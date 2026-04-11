@@ -17,7 +17,7 @@ int main(void)
     DeviceDescriptions devices = { 
         .cpu_freq_local = 700.0 MHz,
         .cpu_freq_offloaded = 3600.0 MHz,
-        .network_latency = 200.0 ms,
+        .network_latency = 5.0 ms,
         .bandwidth_up = 10.0 Mbps,
         .bandwidth_down = 100.0 Mbps,
         .power_load = 2.5 Watts,
@@ -33,7 +33,7 @@ int main(void)
         TaskDescription task = {
             .task_input_size = 10240,
             .task_output_size = 10240,
-            .task_computation_size = i * 100.0 * 1000000.0
+            .task_computation_size = i * 2000.0
         };
 
         DecisionFactors factors = calculate_factors(&devices, &task);
