@@ -13,7 +13,7 @@ if(PLATFORM_RPI)
 endif()
 
 add_subdirectory(decision)
-add_subdirectory(task)
+add_subdirectory(task_examples)
 
 add_subdirectory(simulation)
 add_subdirectory(client)

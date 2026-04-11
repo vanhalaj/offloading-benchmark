@@ -1,13 +1,12 @@
 #ifndef DECISION_H
 #define DECISION_H
 
-#include <stdint.h>
+#include "task.h"
+#include "device.h"
 
 struct decision_factors_t
 {
-	int32_t task_input_size; // bytes
-	int32_t task_output_size; // bytes
-	int32_t task_computation_size; // cycles
+	TaskDescription task;
 	double delay_local; // total local delay, (same as computation local)
 	double delay_offloaded; // total offloaded delay (transmission + computation + receive)
 	double delay_computation_local; // seconds
@@ -40,5 +39,10 @@ const char* decision_algorithm_to_string(DecisionAlgorithm algorithm);
  * @return 0 for local execution and 1 for offloading. Other values mean error
  */
 int do_offload_decision(DecisionFactors factors, DecisionAlgorithm algorithm);
+
+/*!
+ * Calculate decision factors from device and task variables
+ */
+DecisionFactors calculate_factors(DeviceDescriptions* devices, TaskDescription* task);
 
 #endif // DECISION_H

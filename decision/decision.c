@@ -39,3 +39,12 @@ int do_offload_decision(DecisionFactors factors, DecisionAlgorithm algorithm)
 
 	return -1;
 }
+
+DecisionFactors calculate_factors(DeviceDescriptions* devices, TaskDescription* task)
+{
+	DecisionFactors factors = {
+		0
+	};
+	
+	return factors;
+}
