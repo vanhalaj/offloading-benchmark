@@ -42,8 +42,13 @@ int do_offload_decision(DecisionFactors factors, DecisionAlgorithm algorithm)
 
 DecisionFactors calculate_factors(DeviceDescriptions* devices, TaskDescription* task)
 {
+	double d_comp_local = task->task_computation_size / devices->cpu_freq_local;
+	double d_comp_off = task->task_computation_size / devices->cpu_freq_offloaded;
+	double d_trans = task->task_input_size / devices->bandwidth_up;
+	//double d_tx = 
+
 	DecisionFactors factors = {
-		0
+		.task = *task
 	};
 	
 	return factors;
