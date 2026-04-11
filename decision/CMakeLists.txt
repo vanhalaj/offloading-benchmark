@@ -5,6 +5,8 @@ add_library(decision STATIC
     greedy/greedy.c
     task.h
     device.h
+    lyapunov/lyapunov.h
+    lyapunov/lyapunov.c
 )
 
 target_include_directories(decision PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -20,6 +20,9 @@ double accumulated_energy_profit = 0.0;
 
 int greedy_decision(DecisionFactors factors)
 {
+	accumulated_delay_profit += factors.delay_local;
+	accumulated_energy_profit += factors.energy_local;
+
 	if ((factors.energy_offloaded < accumulated_energy_profit) 
 		&& (factors.energy_offloaded < factors.energy_local * max_loss_difference))
 	{
@@ -27,17 +30,17 @@ int greedy_decision(DecisionFactors factors)
 			&& (factors.delay_offloaded < factors.delay_local * max_loss_difference))
 		{
 			// offload
-			double task_delay_profit = factors.delay_local - factors.delay_offloaded;
-			double task_energy_profit = factors.energy_local - factors.energy_offloaded;
-
-			accumulated_delay_profit += task_delay_profit;
-			accumulated_energy_profit += task_energy_profit;
+			accumulated_delay_profit -= factors.delay_offloaded;
+			accumulated_energy_profit -= factors.energy_offloaded;
 
 			return 1;
 		}
 	}
 	
 	// local execution
+	accumulated_delay_profit -= factors.delay_local;
+	accumulated_energy_profit -= factors.energy_local;
+
 	return 0;
 }
 
