@@ -5,6 +5,8 @@
 #include "device.h"
 #include "task.h"
 
+#include "profiled_estimate.h"
+
 #define MHz * 1000000.0
 #define Mbps * 1000000.0
 #define ms * 0.001
@@ -28,12 +30,15 @@ int main(void)
 
     DecisionAlgorithm algo = GREEDY;
 
-    for (int i = 1; i < 64; i++)
+    for (int i = 1; i < 128; i++)
     {
+        int input_size = i * 10000;
+        double computation_size = estimate_e1_complexity(input_size);
+
         TaskDescription task = {
-            .task_input_size = 10240,
-            .task_output_size = 10240,
-            .task_computation_size = i * 2000.0
+            .task_input_size = input_size,
+            .task_output_size = input_size,
+            .task_computation_size = computation_size
         };
 
         DecisionFactors factors = calculate_factors(&devices, &task);
