@@ -13,6 +13,8 @@ void generate_task_queue(TaskDescription* task_queue, int task_count, int min_si
 {
 	srand(seed);
 
+	// TODO generate dependencies between tasks
+
 	for (int i = 0; i < task_count; i++)
 	{
 		int size = min_size + (rand() % (max_size - min_size));

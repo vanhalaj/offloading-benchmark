@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include "greedy/greedy.h"
+#include "lyapunov/lyapunov.h"
 
 const char* decision_algorithm_to_string(DecisionAlgorithm algorithm)
 {
@@ -33,7 +34,7 @@ int do_offload_decision(DecisionFactors factors, DecisionAlgorithm algorithm)
 		case GREEDY:
 			return greedy_decision(factors);
 		case LYAPUNOV:
-			return 0;
+			return lyapunov_decision(factors);
 		case REINFORCEMENT_LEARNING:
 			return 0;
 	}
