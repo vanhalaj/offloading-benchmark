@@ -1,5 +1,6 @@
 #include "decision.h"
 
+#include <stdlib.h>
 #include "greedy/greedy.h"
 
 const char* decision_algorithm_to_string(DecisionAlgorithm algorithm)
@@ -32,12 +33,12 @@ int do_offload_decision(DecisionFactors factors, DecisionAlgorithm algorithm)
 		case GREEDY:
 			return greedy_decision(factors);
 		case LYAPUNOV:
-			return -2;
+			return 0;
 		case REINFORCEMENT_LEARNING:
-			return -2;
+			return 0;
 	}
 
-	return -1;
+	exit(1);
 }
 
 DecisionFactors calculate_factors(DeviceDescriptions* devices, TaskDescription* task)

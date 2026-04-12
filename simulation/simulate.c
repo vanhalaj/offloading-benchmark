@@ -1,60 +1,87 @@
 #include "simulate.h"
 
-#include "profiled_estimate.h"
-#include "decision.h"
-
-void run_sweep(const SweepConfig* cfg, DeviceDescriptions* devices, int task_input_size)
+static void write_csv_header(FILE* fp, SweepConfig* cfg)
 {
+    switch (cfg->type)
+    {
+        case SWEEP_CPU_FREQ_LOCAL: fprintf(fp, "f_local"); break;
+        case SWEEP_CPU_FREQ_OFFLOADED: fprintf(fp, "f_off"); break;
+        case SWEEP_LATENCY: fprintf(fp, "d_network"); break;
+        case SWEEP_BANDWIDTH_UP: fprintf(fp, "r_up"); break;
+        case SWEEP_BANDWIDTH_DOWN: fprintf(fp, "r_down"); break;
+        case SWEEP_POWER_LOAD: fprintf(fp, "p_load"); break;
+        case SWEEP_POWER_IDLE: fprintf(fp, "p_idle"); break;
+        case SWEEP_POWER_TRANSMITTER: fprintf(fp, "p_tx"); break;
+        case SWEEP_POWER_RECEIVER: fprintf(fp, "p_rx"); break;
+    }
+    for (DecisionAlgorithm algo = 0; algo < DECISION_ALGORITHM_COUNT; algo++)
+    {
+        const char* name = decision_algorithm_to_string(algo);
+        fprintf(fp, ",%s_e_total", name);
+        fprintf(fp, ",%s_d_total", name);
+        fprintf(fp, ",%s_offload_count", name);
+        fprintf(fp, ",%s_task_total", name);
+    }
+    fprintf(fp, "\n");
+}
+
+static void log_results(FILE* fp, double x, SimResult results[])
+{
+    fprintf(fp, "%f", x);
+    for (DecisionAlgorithm algo = 0; algo < DECISION_ALGORITHM_COUNT; algo++)
+    {
+        SimResult* result = &results[algo];
+        fprintf(fp, ",%f", result->total_energy);
+        fprintf(fp, ",%f", result->total_delay);
+        fprintf(fp, ",%d", result->offloaded_count);
+        fprintf(fp, ",%d", result->task_count);
+    }
+    fprintf(fp, "\n");
+}
+
+void run_sweep(const SweepConfig* cfg, DeviceDescriptions* devices, TaskDescription* task_queue, int task_count, FILE* fp)
+{
+    write_csv_header(fp, cfg);
+
     for (double x = cfg->start; x <= cfg->end; x += cfg->step)
     {
-        int input_size = task_input_size;
         DeviceDescriptions dev = *devices;
 
         switch (cfg->type)
         {
-        case SWEEP_INPUT_SIZE:
-            input_size = (int)x;
-            break;
-
-        case SWEEP_CPU_FREQ_LOCAL:
-            dev.cpu_freq_local = x;
-            break;
-
-        case SWEEP_CPU_FREQ_OFFLOADED:
-            dev.cpu_freq_offloaded = x;
-            break;
-
-        case SWEEP_BANDWIDTH_UP:
-            dev.bandwidth_up = x;
-            break;
-
-        case SWEEP_LATENCY:
-            dev.network_latency = x;
-            break;
-
-            // TODO rest of sweep cases
+            case SWEEP_CPU_FREQ_LOCAL: dev.cpu_freq_local = x; break;
+            case SWEEP_CPU_FREQ_OFFLOADED: dev.cpu_freq_offloaded = x; break;
+            case SWEEP_LATENCY: dev.network_latency = x; break;
+            case SWEEP_BANDWIDTH_UP: dev.bandwidth_up = x; break;
+            case SWEEP_BANDWIDTH_DOWN: dev.bandwidth_down = x; break;
+            case SWEEP_POWER_LOAD: dev.power_load = x; break;
+            case SWEEP_POWER_IDLE: dev.power_idle = x; break;
+            case SWEEP_POWER_TRANSMITTER: dev.power_transmitter = x; break;
+            case SWEEP_POWER_RECEIVER: dev.power_receiver = x; break;
         }
 
-        double computation_size = estimate_e1_complexity(input_size);
+        SimResult results[DECISION_ALGORITHM_COUNT] = { 0 };
 
-        TaskDescription task = {
-            .task_input_size = input_size,
-            .task_output_size = input_size,
-            .task_computation_size = computation_size
-        };
-
-        DecisionFactors factors = calculate_factors(&dev, &task);
-
-        for (int algo = ALWAYS_LOCAL; algo <= REINFORCEMENT_LEARNING; algo++)
+        for (int task_index = 0; task_index < task_count; task_index++)
         {
-            int decision = do_offload_decision(factors, algo);
+            TaskDescription* task = &task_queue[task_index];
+            DecisionFactors factors = calculate_factors(&dev, task);
 
-            printf("========== Iteration ============\n");
-            printf("Algo type: %s \n", decision_algorithm_to_string(algo));
-            printf("Task in %d out %d computation %f", task.task_input_size, task.task_output_size, task.task_computation_size);
-            printf("Local energy: %f offloaded %f \n", factors.energy_local, factors.energy_offloaded);
-            printf("Local delay: %f offloaded %f \n", factors.delay_local, factors.delay_offloaded);
-            printf("Decision was %d \n", decision);
+            for (DecisionAlgorithm algo = 0; algo < DECISION_ALGORITHM_COUNT; algo++)
+            {
+                int decision = do_offload_decision(factors, algo);
+                update_result(&results[algo], decision, &factors);
+            }
         }
+
+        log_results(fp, x, results);
     }
+}
+
+void update_result(SimResult* result, int decision, DecisionFactors* factors)
+{
+    result->offloaded_count += decision;
+    result->task_count += 1;
+    result->total_energy += ((1 - decision) * factors->energy_local + decision * factors->energy_offloaded);
+    result->total_delay += ((1 - decision) * factors->delay_local + decision * factors->delay_offloaded);
 }

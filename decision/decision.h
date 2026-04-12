@@ -21,6 +21,7 @@ struct decision_factors_t
 	double energy_idle; // joules
 } typedef DecisionFactors;
 
+#define DECISION_ALGORITHM_COUNT 5
 enum decision_algorithm_t
 {
 	ALWAYS_LOCAL,
