@@ -2,7 +2,7 @@
 #include <math.h>
 #include <stdio.h>
 
-double v = 1.0;
+double v = 50.0;
 double rho = 0.1;
 
 double arrival_rate = 21.2914340090; // jos laskis alkuun paljonko menee kaikkien teht‰vien paikallisessa suorituksessa, josta jakamalla teht‰vien m‰‰r‰ll‰ saadaan t‰‰
@@ -30,8 +30,7 @@ int lyapunov_decision(DecisionFactors factors)
 		eta_remote * X2 +
 		v * factors.energy_offloaded;
 
-	// TODO
-	printf("Lyapunov: local %f remote %f", f_local, f_remote);
+	//printf("Lyapunov: local %f remote %f\n", f_local, f_remote);
 	int decision = f_remote < f_local;
 
 	// update state

@@ -1,1 +1,2 @@
 PROFILER=..\out\build\x64-release\profiler\
+SIMULATION=..\out\build\x64-release\simulation\
