@@ -4,6 +4,8 @@
 #include "greedy/greedy.h"
 #include "lyapunov/lyapunov.h"
 
+static int previous_decision = 0;
+
 const char* decision_algorithm_to_string(DecisionAlgorithm algorithm)
 {
 	switch (algorithm)
@@ -25,21 +27,28 @@ const char* decision_algorithm_to_string(DecisionAlgorithm algorithm)
 
 int do_offload_decision(DecisionFactors factors, DecisionAlgorithm algorithm)
 {
+	int decision = 0;
 	switch (algorithm)
 	{
 		case ALWAYS_LOCAL:
-			return 0;
+			decision = 0;
+			break;
 		case ALWAYS_OFFLOAD:
-			return 1;
+			decision = 1;
+			break;
 		case GREEDY:
-			return greedy_decision(factors);
+			decision = greedy_decision(factors);
+			break;
 		case LYAPUNOV:
-			return lyapunov_decision(factors);
+			decision = lyapunov_decision(factors);
+			break;
 		case REINFORCEMENT_LEARNING:
-			return 0;
+			decision = 0;
+			break;
 	}
 
-	exit(1);
+	previous_decision = decision;
+	return decision;
 }
 
 DecisionFactors calculate_factors(DeviceDescriptions* devices, TaskDescription* task)
@@ -52,7 +61,7 @@ DecisionFactors calculate_factors(DeviceDescriptions* devices, TaskDescription* 
 	double d_rx = d_recv + devices->network_latency;
 
 	double d_local = d_comp_local;
-	double d_off = d_tx + d_comp_off + d_rx;
+	double d_off = (1 - (task->dependent && previous_decision)) * d_tx + d_comp_off + d_rx;
 
 	double e_comp_local = devices->power_load * d_comp_local;
 	double e_idle = devices->power_idle * d_comp_off;

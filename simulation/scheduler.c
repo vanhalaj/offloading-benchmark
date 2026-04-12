@@ -4,6 +4,9 @@
 
 #include "profiled_estimate.h"
 
+const float DEPENDENCY_PROBABILITY = 0.35f;
+//const float OFFLOADABLE_PROBABILITY = 0.95f;
+
 double (*task_estimates[])(int) = {
 	estimate_e1_complexity
 };
@@ -13,19 +16,21 @@ void generate_task_queue(TaskDescription* task_queue, int task_count, int min_si
 {
 	srand(seed);
 
-	// TODO generate dependencies between tasks
-
 	for (int i = 0; i < task_count; i++)
 	{
 		int size = min_size + (rand() % (max_size - min_size));
 		int type = rand() % TASK_FUNCTIONS_COUNT;
+		int dependency = rand() > (int)(DEPENDENCY_PROBABILITY * RAND_MAX);
+		int offloadability = 1;// rand() > (int)(OFFLOADABLE_PROBABILITY * RAND_MAX);
 
 		double complexity = task_estimates[type](size);
 
 		TaskDescription task = {
 			.task_input_size = size,
 			.task_output_size = size,
-			.task_computation_size = complexity * 8.0
+			.task_computation_size = complexity * 8.0,
+			.dependent = dependency,
+			.offloadable = offloadability
 		};
 		task_queue[i] = task;
 	}

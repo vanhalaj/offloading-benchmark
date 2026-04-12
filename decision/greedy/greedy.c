@@ -12,7 +12,7 @@
 #include "greedy.h"
 
 // the part over 1.0 is the actual allowed loss
-double max_loss_difference = 1.5;
+double max_loss_difference = 1.25;
 
 // positive means profit compared to full local execution
 double accumulated_delay_profit = 0.0;
