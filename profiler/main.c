@@ -8,7 +8,7 @@
 
 #include "task_examples.h"
 
-#define ITERATIONS_PER_INPUT_SIZE 64
+#define ITERATIONS_PER_INPUT_SIZE 48
 
 struct profiler_result_t
 {
@@ -93,7 +93,7 @@ int main(void)
 	// CSV header
 	fprintf(fp, "n,cycles\n");
 
-	for (int input_size = 16; input_size < 512; input_size += 16)
+	for (int input_size = 32; input_size < 1024; input_size += 32)
 	{
 		ProfilerResult result = profile_matrix_example(input_size);
 

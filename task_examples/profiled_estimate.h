@@ -7,10 +7,10 @@
 
 double estimate_e1_complexity(int input_size) 
 {
-	double a = -1.722423079081897e-11;
-	double b = 0.00010120903779810782;
-	double c = 23.44727132746589;
-	double d = 0.00020858456202852183;
+	double a = -1.413167844588973e-11;
+	double b = 0.00018363257100025482;
+	double c = 150.6686704329816;
+	double d = 0.0003350833258305607;
 
 	return 
 		a * pow(input_size, 3) 
