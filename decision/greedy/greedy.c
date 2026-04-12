@@ -4,9 +4,9 @@
  * bigger the offloaded energy and delay is allowed to be per task.
  * 
  * Somewhat based on the idea presented in:
- * S. Sundar and B. Liang. Offloading dependent tasks with communication
- * delay and deadline constraint. IEEE INFOCOM 2018 - IEEE Conference on Com-
- * puter Communications, pages 37–45, 2018. doi: 10.1109/INFOCOM.2018.8486305.
+ * S. Sundar and B. Liang. Offloading dependent tasks with communication delay and 
+ * deadline constraint. IEEE INFOCOM 2018 - IEEE Conference on Computer Communications,
+ * pages 37–45, 2018. doi: 10.1109/INFOCOM.2018.8486305.
  */
 
 #include "greedy.h"

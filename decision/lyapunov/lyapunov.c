@@ -1,3 +1,12 @@
+/*
+ * Online algorithm for offloading decision, utilizing Lyapunov optimization. 
+ * 
+ * Based on formulas presented in: 
+ * D. Huang, P. Wang and D. Niyato. A dynamic offloading algorithm for mobile computing. 
+ * IEEE Transactions on Wireless Communications, 11(6):1991ñ1995, 2012.
+ * doi: 10.1109/TWC.2012.041912.110912
+ */
+
 #include "lyapunov.h"
 #include <math.h>
 #include <stdio.h>
@@ -5,7 +14,7 @@
 double v = 800.0;
 double rho = 0.1;
 
-double arrival_rate = 21.2914340090; // jos laskis alkuun paljonko menee kaikkien teht‰vien paikallisessa suorituksessa, josta jakamalla teht‰vien m‰‰r‰ll‰ saadaan t‰‰
+double arrival_rate = 21.2914340090; // amount of tasks / total delay of full local execution
 
 static double X1 = 0.0;
 static double X2 = 0.0;
