@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "simulate.h"
 #include "decision.h"
 #include "device.h"
 #include "task.h"
-
-#include "profiled_estimate.h"
 
 #define MHz * 1000000.0
 #define Mbps * 1000000.0
@@ -28,29 +27,15 @@ int main(void)
         .power_receiver = 0.2 Watts
     };
 
-    DecisionAlgorithm algo = GREEDY;
+    SweepConfig sweeps[] = {
+        { .type = SWEEP_INPUT_SIZE, .start = 10000, .end = 128*10000, .step = 10000 },
+        { .type = SWEEP_CPU_FREQ_LOCAL, .start = 500 MHz, .end = 3000 MHz, .step = 100 MHz },
+        { .type = SWEEP_LATENCY, .start = 1 ms, .end = 50 ms, .step = 1 ms }
+    };
 
-    for (int i = 1; i < 128; i++)
-    {
-        int input_size = i * 10000;
-        double computation_size = estimate_e1_complexity(input_size);
-
-        TaskDescription task = {
-            .task_input_size = input_size,
-            .task_output_size = input_size,
-            .task_computation_size = computation_size
-        };
-
-        DecisionFactors factors = calculate_factors(&devices, &task);
-
-        int decision = do_offload_decision(factors, algo);
-
-        printf("========== Iteration %d ============\n", i);
-        printf("Algo type: %s \n", decision_algorithm_to_string(algo));
-        printf("Local energy: %f offloaded %f \n", factors.energy_local, factors.energy_offloaded);
-        printf("Local delay: %f offloaded %f \n", factors.delay_local, factors.delay_offloaded);
-        printf("Decision was %d \n", decision);
-    }
+    // TODO sweep over all options
+    // TODO scheduler
+    run_sweep(&sweeps[0], &devices, 100000);
 
     return 0;
 }

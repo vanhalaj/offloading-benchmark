@@ -19,8 +19,7 @@ struct decision_factors_t
 	double energy_transmission; // joules
 	double energy_receive; // joules
 	double energy_idle; // joules
-};
-typedef struct decision_factors_t DecisionFactors;
+} typedef DecisionFactors;
 
 enum decision_algorithm_t
 {
@@ -29,8 +28,7 @@ enum decision_algorithm_t
 	GREEDY,
 	LYAPUNOV,
 	REINFORCEMENT_LEARNING
-};
-typedef enum decision_algorithm_t DecisionAlgorithm;
+} typedef DecisionAlgorithm;
 
 const char* decision_algorithm_to_string(DecisionAlgorithm algorithm);
 
