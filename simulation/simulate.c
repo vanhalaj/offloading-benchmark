@@ -111,7 +111,7 @@ void run_sweep(const SweepConfig* cfg, const DeviceDescriptions* devices, const 
                     set_arrival_rate((double)results[ALWAYS_LOCAL].task_count / results[ALWAYS_LOCAL].total_delay);
                 }
 
-                int decision = do_offload_decision(factors, algo);
+                int decision = do_offload_decision(&factors, algo);
                 update_result(&results[algo], decision, &factors);
             }
         }

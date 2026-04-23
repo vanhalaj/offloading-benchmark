@@ -3,7 +3,7 @@
 
 #include "decision.h"
 
-int greedy_decision(DecisionFactors factors);
+int greedy_decision(const DecisionFactors* factors);
 
 /*!
  * @brief Max allowed per-task energy and delay loss to limit greediness

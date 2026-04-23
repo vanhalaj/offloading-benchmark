@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "greedy/greedy.h"
 #include "lyapunov/lyapunov.h"
+#include "rl/rl.h"
 
 static int previous_decision = 0;
 
@@ -26,7 +27,7 @@ const char* decision_algorithm_to_string(DecisionAlgorithm algorithm)
 	}
 }
 
-int do_offload_decision(DecisionFactors factors, DecisionAlgorithm algorithm)
+int do_offload_decision(const DecisionFactors* factors, DecisionAlgorithm algorithm)
 {
 	int decision = 0;
 	switch (algorithm)
@@ -44,7 +45,7 @@ int do_offload_decision(DecisionFactors factors, DecisionAlgorithm algorithm)
 			decision = lyapunov_decision(factors);
 			break;
 		case REINFORCEMENT_LEARNING:
-			decision = 0;
+			decision = reinforcement_learning_decision(factors);
 			break;
 	}
 
@@ -68,7 +69,7 @@ static void validate_data(const DeviceDescriptions* d, const TaskDescription* t)
 	}
 }
 
-DecisionFactors calculate_factors(DeviceDescriptions* devices, TaskDescription* task)
+DecisionFactors calculate_factors(const DeviceDescriptions* devices, const TaskDescription* task)
 {
 	validate_data(devices, task);
 

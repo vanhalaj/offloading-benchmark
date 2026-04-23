@@ -3,7 +3,7 @@
 
 #include "decision.h"
 
-int lyapunov_decision(DecisionFactors factors);
+int lyapunov_decision(const DecisionFactors* factors);
 
 void set_arrival_rate(double rate);
 

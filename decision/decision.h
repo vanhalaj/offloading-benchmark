@@ -37,11 +37,11 @@ const char* decision_algorithm_to_string(DecisionAlgorithm algorithm);
  * @brief Make offloading decision with the given factors.
  * @return 0 for local execution and 1 for offloading. Other values mean error
  */
-int do_offload_decision(DecisionFactors factors, DecisionAlgorithm algorithm);
+int do_offload_decision(const DecisionFactors* factors, DecisionAlgorithm algorithm);
 
 /*!
  * Calculate decision factors from device and task variables
  */
-DecisionFactors calculate_factors(DeviceDescriptions* devices, TaskDescription* task);
+DecisionFactors calculate_factors(const DeviceDescriptions* devices, const TaskDescription* task);
 
 #endif // DECISION_H

@@ -20,31 +20,31 @@ double arrival_rate = 21.2914340090;
 static double X1 = 0.0;
 static double X2 = 0.0;
 
-int lyapunov_decision(DecisionFactors factors)
+int lyapunov_decision(const DecisionFactors* factors)
 {
 	// TODO? Since tasks have no actual deadlines, just use local delay estimate with some multiplier 
-	double delay_constraint = 1.5 * factors.delay_local;
+	double delay_constraint = 1.5 * factors->delay_local;
 
-	double sigma_local = factors.delay_local * arrival_rate;
-	double sigma_remote = factors.delay_offloaded * arrival_rate;
+	double sigma_local = factors->delay_local * arrival_rate;
+	double sigma_remote = factors->delay_offloaded * arrival_rate;
 
-	double eta_local = (factors.delay_local > delay_constraint) ? 1.0 : 0.0;
-	double eta_remote = (factors.delay_offloaded > delay_constraint) ? 1.0 : 0.0;
+	double eta_local = (factors->delay_local > delay_constraint) ? 1.0 : 0.0;
+	double eta_remote = (factors->delay_offloaded > delay_constraint) ? 1.0 : 0.0;
 	
 	double f_local =
 		sigma_local * X1 +
 		eta_local * X2 +
-		v * factors.energy_local;
+		v * factors->energy_local;
 
 	double f_remote =
 		sigma_remote * X1 +
 		eta_remote * X2 +
-		v * factors.energy_offloaded;
+		v * factors->energy_offloaded;
 
 	int decision = f_remote < f_local;
 
 	// update state
-	double delay = decision ? factors.delay_offloaded : factors.delay_local;
+	double delay = decision ? factors->delay_offloaded : factors->delay_local;
 	double sigma = decision ? sigma_remote : sigma_local;
 	double eta = (delay > delay_constraint) ? 1.0 : 0.0;
 	X1 = fmax(X1 - 1.0, 0.0) + sigma;

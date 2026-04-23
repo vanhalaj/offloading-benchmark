@@ -14,15 +14,15 @@
 #define Watts * 1.0
 
 const DeviceDescriptions devices = {
-        .cpu_freq_local = 700.0 MHz,
-        .cpu_freq_offloaded = 3600.0 MHz,
-        .network_latency = 2.0 ms,
-        .bandwidth_up = 100.0 Mbps,
-        .bandwidth_down = 100.0 Mbps,
-        .power_load = 2.5 Watts,
-        .power_idle = 1.2 Watts,
-        .power_transmitter = 0.2 Watts,
-        .power_receiver = 0.2 Watts
+    .cpu_freq_local = 700.0 MHz,
+    .cpu_freq_offloaded = 3600.0 MHz,
+    .network_latency = 2.0 ms,
+    .bandwidth_up = 100.0 Mbps,
+    .bandwidth_down = 100.0 Mbps,
+    .power_load = 2.5 Watts,
+    .power_idle = 1.2 Watts,
+    .power_transmitter = 0.2 Watts,
+    .power_receiver = 0.2 Watts
 };
 
 const SchedulerConfig scheduler = {

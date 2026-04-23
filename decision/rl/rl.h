@@ -3,6 +3,6 @@
 
 #include "decision.h"
 
-int reinforcement_learning_decision(DecisionFactors factors);
+int reinforcement_learning_decision(const DecisionFactors* factors);
 
 #endif
