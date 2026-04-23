@@ -5,8 +5,9 @@
 #include "device.h"
 #include "task.h"
 #include "decision.h"
+#include "scheduler.h"
 
-enum sweep_type_t 
+enum sweep_type_t
 {
     SWEEP_CPU_FREQ_LOCAL,
     SWEEP_CPU_FREQ_OFFLOADED,
@@ -17,7 +18,11 @@ enum sweep_type_t
     SWEEP_POWER_IDLE,
     SWEEP_POWER_TRANSMITTER,
     SWEEP_POWER_RECEIVER,
-    SWEEP_TASK_COMPUTATION
+    SWEEP_TASK_COMPLEXITY_AVG,
+    SWEEP_TASK_COMPLEXITY_VAR,
+    SWEEP_TASK_SIZE_AVG,
+    SWEEP_TASK_SIZE_VAR,
+    SWEEP_TASK_DEPENDENCY_PROB
 } typedef SweepType;
 
 struct sweep_config_t 
@@ -37,7 +42,7 @@ struct sim_result_t
 } typedef SimResult;
 
 
-void run_sweep(const SweepConfig* cfg, DeviceDescriptions* devices, TaskDescription* task_queue, int task_count, FILE* fp);
+void run_sweep(const SweepConfig* cfg, const DeviceDescriptions* devices, const SchedulerConfig* scheduler_cfg, FILE* fp);
 
 void update_result(SimResult* result, int decision, DecisionFactors* factors);
 

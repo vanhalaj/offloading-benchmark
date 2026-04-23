@@ -4,36 +4,42 @@
 
 #include "profiled_estimate.h"
 
-const float DEPENDENCY_PROBABILITY = 0.35f;
-//const float OFFLOADABLE_PROBABILITY = 0.95f;
-
 double (*task_estimates[])(int) = {
 	estimate_e1_complexity
 };
 const int TASK_FUNCTIONS_COUNT = sizeof(task_estimates) / sizeof(task_estimates[0]);
 
-void generate_task_queue(TaskDescription* task_queue, int task_count, int min_size, int max_size, unsigned int seed)
+static inline int random_range(int min, int max)
 {
-	srand(seed);
+	return min + (rand() % (max - min + 1));
+}
 
-	for (int i = 0; i < task_count; i++)
+static inline double random_range_d(double min, double max)
+{
+	return min + ((double)rand() / RAND_MAX) * (max - min);
+}
+
+void generate_task_queue(TaskDescription* task_queue, const SchedulerConfig* config)
+{
+	srand(config->generator_seed);
+
+	for (int i = 0; i < config->task_count; i++)
 	{
-		//int size = min_size + (rand() % (max_size - min_size));
-		int size = 10000 + (rand() % (128*10000 - 10000));
-		int type = rand() % TASK_FUNCTIONS_COUNT;
-		int dependency = rand() > (int)(DEPENDENCY_PROBABILITY * RAND_MAX);
-		int offloadability = 1;// rand() > (int)(OFFLOADABLE_PROBABILITY * RAND_MAX);
+		const int size = random_range(config->avg_size - config->var_size, config->avg_size + config->var_size);
+		const int type = rand() % TASK_FUNCTIONS_COUNT;
+		const int dependency = rand() > (int)(config->dependency_probability * RAND_MAX);
+		const int offloadability = 1;// rand() > (int)(OFFLOADABLE_PROBABILITY * RAND_MAX);
 
-		//double complexity = task_estimates[type](size);
-		double complexity = min_size + (rand() % (max_size - min_size));
+		const double complexity = config->complexity_mode == COMPLEXITY_ESTIMATE
+			? task_estimates[type](size) * config->complexity_multiplier
+			: random_range_d(config->avg_complexity - config->var_complexity, config->avg_complexity + config->var_complexity);
 
-		TaskDescription task = {
+		task_queue[i] = (TaskDescription){
 			.task_input_size = size,
 			.task_output_size = size,
-			.task_computation_size = complexity,// * 8.0,
+			.task_computation_size = complexity,
 			.dependent = dependency,
 			.offloadable = offloadability
 		};
-		task_queue[i] = task;
 	}
 }
