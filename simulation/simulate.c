@@ -51,7 +51,11 @@ void run_sweep(const SweepConfig* cfg, DeviceDescriptions* devices, TaskDescript
     {
         DeviceDescriptions dev = *devices;
 
-        switch (cfg->type)
+        int avg_task_size = (int)x;
+        int variance = 25000;
+        generate_task_queue(task_queue, 4096, avg_task_size - variance, avg_task_size + variance, 12345U);
+
+        /*switch (cfg->type)
         {
             case SWEEP_CPU_FREQ_LOCAL: dev.cpu_freq_local = x; break;
             case SWEEP_CPU_FREQ_OFFLOADED: dev.cpu_freq_offloaded = x; break;
@@ -62,7 +66,7 @@ void run_sweep(const SweepConfig* cfg, DeviceDescriptions* devices, TaskDescript
             case SWEEP_POWER_IDLE: dev.power_idle = x; break;
             case SWEEP_POWER_TRANSMITTER: dev.power_transmitter = x; break;
             case SWEEP_POWER_RECEIVER: dev.power_receiver = x; break;
-        }
+        }*/
 
         SimResult results[DECISION_ALGORITHM_COUNT] = { 0 };
 

@@ -6,7 +6,7 @@
 #include "decision.h"
 #include "device.h"
 #include "task.h"
-#include "scheduler.h"
+//#include "scheduler.h"
 
 #define TASK_COUNT 4096
 
@@ -28,6 +28,7 @@ DeviceDescriptions devices = {
 };
 
 SweepConfig sweeps[] = {
+    {.type = SWEEP_TASK_COMPUTATION, .start = 100000, .end = 10000000, .step = 300000 },
     {.type = SWEEP_LATENCY, .start = 1 ms, .end = 40 ms, .step = 1 ms },
     {.type = SWEEP_CPU_FREQ_LOCAL, .start = 500 MHz, .end = 3000 MHz, .step = 100 MHz },
     {.type = SWEEP_LATENCY, .start = 1 ms, .end = 50 ms, .step = 1 ms }
@@ -38,8 +39,8 @@ int main(void)
     printf("Simulation started\n");
 
     TaskDescription task_queue[TASK_COUNT] = { 0 };
-    int min_task_size = 10000;
-    generate_task_queue(task_queue, TASK_COUNT, min_task_size, 128 * min_task_size, 12345U);
+    //int min_task_size = 10000;
+    //generate_task_queue(task_queue, TASK_COUNT, min_task_size, 128 * min_task_size, 12345U);
 
     FILE* fp = fopen("results.csv", "w");
     if (!fp)

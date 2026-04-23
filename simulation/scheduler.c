@@ -18,17 +18,19 @@ void generate_task_queue(TaskDescription* task_queue, int task_count, int min_si
 
 	for (int i = 0; i < task_count; i++)
 	{
-		int size = min_size + (rand() % (max_size - min_size));
+		//int size = min_size + (rand() % (max_size - min_size));
+		int size = 10000 + (rand() % (128*10000 - 10000));
 		int type = rand() % TASK_FUNCTIONS_COUNT;
 		int dependency = rand() > (int)(DEPENDENCY_PROBABILITY * RAND_MAX);
 		int offloadability = 1;// rand() > (int)(OFFLOADABLE_PROBABILITY * RAND_MAX);
 
-		double complexity = task_estimates[type](size);
+		//double complexity = task_estimates[type](size);
+		double complexity = min_size + (rand() % (max_size - min_size));
 
 		TaskDescription task = {
 			.task_input_size = size,
 			.task_output_size = size,
-			.task_computation_size = complexity * 8.0,
+			.task_computation_size = complexity,// * 8.0,
 			.dependent = dependency,
 			.offloadable = offloadability
 		};
