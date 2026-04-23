@@ -16,7 +16,8 @@ enum sweep_type_t
     SWEEP_POWER_LOAD,
     SWEEP_POWER_IDLE,
     SWEEP_POWER_TRANSMITTER,
-    SWEEP_POWER_RECEIVER
+    SWEEP_POWER_RECEIVER,
+    SWEEP_TASK_COMPUTATION
 } typedef SweepType;
 
 struct sweep_config_t 

@@ -39,11 +39,11 @@ if not os.path.isfile(csv_path):
 df = pd.read_csv(csv_path)
 
 strategies = [
-    ("ALWAYS_LOCAL", 's'),
-    ("ALWAYS_OFFLOAD", 'o'),
-    ("GREEDY", '^'),
-    ("LYAPUNOV", 'x'),
-    ("REINFORCEMENT_LEARNING", 'D')
+    ("ALWAYS_LOCAL", 's', "Aina paikallisesti"),
+    ("ALWAYS_OFFLOAD", 'o', "Ulkoista aina"),
+    ("GREEDY", '^', "Ahne ulkoistaminen"),
+    ("LYAPUNOV", 'x', "Lyapunov-optimointi"),
+    #("REINFORCEMENT_LEARNING", 'D')
 ]
 
 # ---------------------------------------------------------
@@ -53,7 +53,7 @@ strategies = [
 fig, axes = plt.subplots(3, 1, figsize=(10, 15))
 energy_ax, delay_ax, ratio_ax = axes
 
-for strategy, marker_type in strategies:
+for strategy, marker_type, label in strategies:
     e_col = f"{strategy}_e_total"
     d_col = f"{strategy}_d_total"
     offload_col = f"{strategy}_offload_count"
@@ -62,9 +62,9 @@ for strategy, marker_type in strategies:
     ratio = df[offload_col] / df[task_col]
 
     sweep_col = df.columns[0]
-    energy_ax.plot(df[sweep_col], df[e_col], marker=marker_type, markersize=5, label=strategy)
-    delay_ax.plot(df[sweep_col], df[d_col], marker=marker_type, markersize=5, label=strategy)
-    ratio_ax.plot(df[sweep_col], ratio, marker=marker_type, markersize=5, label=strategy)
+    energy_ax.plot(df[sweep_col], df[e_col], marker=marker_type, markersize=5, label=label)
+    delay_ax.plot(df[sweep_col], df[d_col], marker=marker_type, markersize=5, label=label)
+    ratio_ax.plot(df[sweep_col], ratio, marker=marker_type, markersize=5, label=label)
 
 energy_ax.set_title(f"Total Energy vs {sweep_col}")
 energy_ax.set_xlabel(sweep_col)

@@ -52,6 +52,11 @@ int lyapunov_decision(DecisionFactors factors)
 	return decision;
 }
 
+void set_local_time(double rate)
+{
+	arrival_rate = rate;
+}
+
 void set_v(double value)
 {
 	v = value;

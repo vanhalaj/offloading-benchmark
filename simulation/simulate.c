@@ -1,5 +1,8 @@
 #include "simulate.h"
 
+#include "scheduler.h"
+#include "lyapunov/lyapunov.h"
+
 static void write_csv_header(FILE* fp, SweepConfig* cfg)
 {
     switch (cfg->type)
@@ -13,6 +16,7 @@ static void write_csv_header(FILE* fp, SweepConfig* cfg)
         case SWEEP_POWER_IDLE: fprintf(fp, "p_idle"); break;
         case SWEEP_POWER_TRANSMITTER: fprintf(fp, "p_tx"); break;
         case SWEEP_POWER_RECEIVER: fprintf(fp, "p_rx"); break;
+        case SWEEP_TASK_COMPUTATION: fprintf(fp, "c_t"); break;
     }
     for (DecisionAlgorithm algo = 0; algo < DECISION_ALGORITHM_COUNT; algo++)
     {
@@ -69,6 +73,11 @@ void run_sweep(const SweepConfig* cfg, DeviceDescriptions* devices, TaskDescript
 
             for (DecisionAlgorithm algo = 0; algo < DECISION_ALGORITHM_COUNT; algo++)
             {
+                if (algo == LYAPUNOV)
+                {
+                    set_local_time((double)results[0].task_count / results[0].total_delay);
+                }
+
                 int decision = do_offload_decision(factors, algo);
                 update_result(&results[algo], decision, &factors);
             }
