@@ -5,7 +5,7 @@
 
 int lyapunov_decision(DecisionFactors factors);
 
-void set_local_time(double rate);
+void set_arrival_rate(double rate);
 
 void set_v(double v);
 

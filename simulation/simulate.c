@@ -79,7 +79,7 @@ void run_sweep(const SweepConfig* cfg, DeviceDescriptions* devices, TaskDescript
             {
                 if (algo == LYAPUNOV)
                 {
-                    set_local_time((double)results[0].task_count / results[0].total_delay);
+                    set_arrival_rate((double)results[0].task_count / results[0].total_delay);
                 }
 
                 int decision = do_offload_decision(factors, algo);

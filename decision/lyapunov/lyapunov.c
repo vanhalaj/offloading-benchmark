@@ -14,14 +14,16 @@
 double v = 800.0;
 double rho = 0.1;
 
-double arrival_rate = 21.2914340090; // amount of tasks / total delay of full local execution
+// Set by the simulator with: amount of tasks / total delay of full local execution
+double arrival_rate = 21.2914340090;
 
 static double X1 = 0.0;
 static double X2 = 0.0;
 
 int lyapunov_decision(DecisionFactors factors)
 {
-	double delay_constraint = 1.5 * factors.delay_local; // TODO ?
+	// TODO? Since tasks have no actual deadlines, just use local delay estimate with some multiplier 
+	double delay_constraint = 1.5 * factors.delay_local;
 
 	double sigma_local = factors.delay_local * arrival_rate;
 	double sigma_remote = factors.delay_offloaded * arrival_rate;
@@ -39,7 +41,6 @@ int lyapunov_decision(DecisionFactors factors)
 		eta_remote * X2 +
 		v * factors.energy_offloaded;
 
-	//printf("Lyapunov: local %f remote %f\n", f_local, f_remote);
 	int decision = f_remote < f_local;
 
 	// update state
@@ -52,7 +53,7 @@ int lyapunov_decision(DecisionFactors factors)
 	return decision;
 }
 
-void set_local_time(double rate)
+void set_arrival_rate(double rate)
 {
 	arrival_rate = rate;
 }
