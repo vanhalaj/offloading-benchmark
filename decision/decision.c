@@ -1,6 +1,7 @@
 #include "decision.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include "greedy/greedy.h"
 #include "lyapunov/lyapunov.h"
 
@@ -51,8 +52,26 @@ int do_offload_decision(DecisionFactors factors, DecisionAlgorithm algorithm)
 	return decision;
 }
 
+static void validate_data(const DeviceDescriptions* d, const TaskDescription* t)
+{
+	int invalid =
+		(d->bandwidth_down <= 0.0) || (d->bandwidth_up <= 0.0) ||
+		(d->cpu_freq_local <= 0.0) || (d->cpu_freq_offloaded <= 0.0) ||
+		(d->network_latency <= 0.0) ||
+		(d->power_idle <= 0.0) || (d->power_load <= 0.0) ||
+		(d->power_receiver <= 0.0) || (d->power_transmitter <= 0.0) ||
+		(t->task_input_size <= 0) || (t->task_output_size <= 0) ||
+		(t->task_computation_size <= 0.0);
+	if (invalid)
+	{
+		printf("Invalid data found:\nTask: {input: %d, output: %d, comp: %f}\n", t->task_input_size, t->task_output_size, t->task_computation_size);
+	}
+}
+
 DecisionFactors calculate_factors(DeviceDescriptions* devices, TaskDescription* task)
 {
+	validate_data(devices, task);
+
 	double d_comp_local = task->task_computation_size / devices->cpu_freq_local;
 	double d_comp_off = task->task_computation_size / devices->cpu_freq_offloaded;
 	double d_trans = task->task_input_size / devices->bandwidth_up;
