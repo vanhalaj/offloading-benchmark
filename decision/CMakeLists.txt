@@ -14,3 +14,6 @@ add_library(decision STATIC
     network.h)
 
 target_include_directories(decision PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+find_package(OpenMP COMPONENTS C REQUIRED)
+target_link_libraries(decision PUBLIC OpenMP::OpenMP_C)

@@ -4,59 +4,84 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <float.h>
+#include <omp.h>
 
 char* decisions = NULL;
 int decision_count = 0;
 int decision_index = 0;
 
-#define BLOCK_SIZE 12
+#define BLOCK_SIZE 16
 
 static uint32_t solve_block(const DeviceDescriptions* dev, const TaskDescription* task_window, 
 	uint32_t window_size, int last_prev, double* total_max_delay, double* cumulative_delay)
 {
-	uint32_t smallest_found = 0U;
-	double min_block_energy = DBL_MAX;
-	double min_block_delay = 0.0;
-
-	for (uint32_t i = 0; i < (1U << window_size); i++)
+	// Add full local execution delay to total_max_delay
+	double local_sum = 0.0;
+	for (uint32_t i = 0; i < window_size; i++)
 	{
-		double sum_delay = 0.0;
-		double sum_energy = 0.0;
-		for (uint32_t j = 0; j < window_size; j++)
-		{
-			uint32_t previous_decision = j > 0 
-				? (i >> (j - 1)) & 1
-				: last_prev; // stitching windows
-			DecisionFactors f = calculate_factors(dev, &task_window[j], previous_decision);
+		int prev = i == 0 ? last_prev : 0;
+		DecisionFactors f = calculate_factors(dev, &task_window[i], prev);
+		local_sum += f.delay_local;
+	}
+	*total_max_delay += local_sum;
 
-			uint32_t current_decision = (i >> j) & 1;
-			if (current_decision)
+	uint32_t best_mask = 0U;
+	double best_energy = DBL_MAX;
+	double best_delay = 0.0;
+
+	#pragma omp parallel
+	{
+		uint32_t smallest_found = 0U;
+		double min_block_energy = DBL_MAX;
+		double min_block_delay = 0.0;
+
+		int mask;
+		#pragma omp for nowait
+		for (mask = 0; mask < (1 << window_size); mask++)
+		{
+			uint32_t i = (uint32_t)mask;
+			double sum_delay = 0.0;
+			double sum_energy = 0.0;
+			for (uint32_t j = 0; j < window_size; j++)
 			{
-				sum_delay += f.delay_offloaded;
-				sum_energy += f.energy_offloaded;
+				uint32_t previous_decision = j > 0
+					? (i >> (j - 1)) & 1
+					: last_prev; // stitching windows
+				DecisionFactors f = calculate_factors(dev, &task_window[j], previous_decision);
+
+				uint32_t current_decision = (i >> j) & 1;
+				if (current_decision)
+				{
+					sum_delay += f.delay_offloaded;
+					sum_energy += f.energy_offloaded;
+				}
+				else
+				{
+					sum_delay += f.delay_local;
+					sum_energy += f.energy_local;
+				}
 			}
-			else
+
+			if (sum_energy < min_block_energy && (*cumulative_delay) + sum_delay <= (*total_max_delay))
 			{
-				sum_delay += f.delay_local;
-				sum_energy += f.energy_local;
+				smallest_found = i;
+				min_block_energy = sum_energy;
+				min_block_delay = sum_delay;
 			}
 		}
 
-		if (i == 0)
+		#pragma omp critical
 		{
-			*total_max_delay += sum_delay; // delay can be max as big as in full local execution
-			//min_block_energy = sum_energy; // for some reason makes it so that delay is not respected
-		}
-
-		if (sum_energy < min_block_energy && (*cumulative_delay) + sum_delay <= (*total_max_delay))
-		{
-			smallest_found = i;
-			min_block_energy = sum_energy;
-			min_block_delay = sum_delay;
+			if (min_block_energy < best_energy)
+			{
+				best_energy = min_block_energy;
+				best_delay = min_block_delay;
+				best_mask = smallest_found;
+			}
 		}
 	}
-	*cumulative_delay += min_block_delay;
-	return smallest_found;
+	*cumulative_delay += best_delay;
+	return best_mask;
 }
 
 void optimal_prepare(const DeviceDescriptions* dev, const TaskDescription* tasks, int task_count)
