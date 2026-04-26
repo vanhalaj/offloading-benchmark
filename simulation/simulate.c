@@ -102,7 +102,7 @@ void run_sweep(const SweepConfig* cfg, const DeviceDescriptions* devices, const 
         SimResult results[DECISION_ALGORITHM_COUNT] = { 0 };
         int previous_decision[DECISION_ALGORITHM_COUNT] = { 0 };
 
-        optimal_prepare(task_queue, scheduler.task_count);
+        optimal_prepare(&dev, task_queue, scheduler.task_count);
 
         for (int task_index = 0; task_index < scheduler.task_count; task_index++)
         {

@@ -2,8 +2,9 @@
 #define OPTIMAL_H
 
 #include "decision.h"
+#include "device.h"
 
-void optimal_prepare(TaskDescription* tasks, int task_count);
+void optimal_prepare(const DeviceDescriptions* dev, const TaskDescription* tasks, int task_count);
 
 void optimal_free();
 
