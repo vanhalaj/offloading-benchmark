@@ -42,6 +42,6 @@ int do_offload_decision(const DecisionFactors* factors, DecisionAlgorithm algori
 /*!
  * Calculate decision factors from device and task variables
  */
-DecisionFactors calculate_factors(const DeviceDescriptions* devices, const TaskDescription* task);
+DecisionFactors calculate_factors(const DeviceDescriptions* devices, const TaskDescription* task, DecisionAlgorithm algo);
 
 #endif // DECISION_H

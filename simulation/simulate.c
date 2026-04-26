@@ -100,7 +100,6 @@ void run_sweep(const SweepConfig* cfg, const DeviceDescriptions* devices, const 
         for (int task_index = 0; task_index < scheduler.task_count; task_index++)
         {
             TaskDescription* task = &task_queue[task_index];
-            DecisionFactors factors = calculate_factors(&dev, task);
 
             for (DecisionAlgorithm algo = 0; algo < DECISION_ALGORITHM_COUNT; algo++)
             {
@@ -111,6 +110,7 @@ void run_sweep(const SweepConfig* cfg, const DeviceDescriptions* devices, const 
                     set_arrival_rate((double)results[ALWAYS_LOCAL].task_count / results[ALWAYS_LOCAL].total_delay);
                 }
 
+                DecisionFactors factors = calculate_factors(&dev, task, algo);
                 int decision = do_offload_decision(&factors, algo);
                 update_result(&results[algo], decision, &factors);
             }
