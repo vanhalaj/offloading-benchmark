@@ -10,6 +10,7 @@ add_library(decision STATIC
     rl/rl.h
     rl/rl.c
     optimal/optimal.h
-    optimal/optimal.c)
+    optimal/optimal.c 
+    network.h)
 
 target_include_directories(decision PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

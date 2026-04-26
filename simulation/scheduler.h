@@ -2,6 +2,7 @@
 #define SCHEDULER_H
 
 #include "task.h"
+#include "network.h"
 
 enum complexity_mode_t
 {
@@ -24,6 +25,6 @@ struct scheduler_config_t
 	unsigned int generator_seed;
 } typedef SchedulerConfig;
 
-void generate_task_queue(TaskDescription* task_queue, const SchedulerConfig* config);
+void generate_task_queue(TaskDescription* task_queue, const SchedulerConfig* config, const NetworkDescription* network);
 
 #endif

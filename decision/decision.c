@@ -59,9 +59,9 @@ int do_offload_decision(const DecisionFactors* factors, DecisionAlgorithm algori
 static void validate_data(const DeviceDescriptions* d, const TaskDescription* t)
 {
 	int invalid =
-		(d->bandwidth_down <= 0.0) || (d->bandwidth_up <= 0.0) ||
+		(t->network_state.r_down <= 0.0) || (t->network_state.r_up <= 0.0) ||
 		(d->cpu_freq_local <= 0.0) || (d->cpu_freq_offloaded <= 0.0) ||
-		(d->network_latency <= 0.0) ||
+		(t->network_state.latency <= 0.0) ||
 		(d->power_idle <= 0.0) || (d->power_load <= 0.0) ||
 		(d->power_receiver <= 0.0) || (d->power_transmitter <= 0.0) ||
 		(t->task_input_size <= 0) || (t->task_output_size <= 0) ||
@@ -78,10 +78,10 @@ DecisionFactors calculate_factors(const DeviceDescriptions* devices, const TaskD
 
 	double d_comp_local = task->task_computation_size / devices->cpu_freq_local;
 	double d_comp_off = task->task_computation_size / devices->cpu_freq_offloaded;
-	double d_trans = task->task_input_size / devices->bandwidth_up;
-	double d_tx = d_trans + devices->network_latency;
-	double d_recv = task->task_output_size / devices->bandwidth_down;
-	double d_rx = d_recv + devices->network_latency;
+	double d_trans = task->task_input_size / task->network_state.r_up;
+	double d_tx = d_trans + task->network_state.latency;
+	double d_recv = task->task_output_size / task->network_state.r_down;
+	double d_rx = d_recv + task->network_state.latency;
 
 	double d_local = d_comp_local;
 	double d_off = (1 - (task->dependent && previous_decision)) * d_tx + d_comp_off + d_rx;

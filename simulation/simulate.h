@@ -6,12 +6,14 @@
 #include "task.h"
 #include "decision.h"
 #include "scheduler.h"
+#include "network.h"
 
 enum sweep_type_t
 {
     SWEEP_CPU_FREQ_LOCAL,
     SWEEP_CPU_FREQ_OFFLOADED,
-    SWEEP_LATENCY,
+    SWEEP_LATENCY_AVG,
+    SWEEP_LATENCY_VAR,
     SWEEP_BANDWIDTH_UP,
     SWEEP_BANDWIDTH_DOWN,
     SWEEP_POWER_LOAD,
@@ -42,7 +44,7 @@ struct sim_result_t
 } typedef SimResult;
 
 
-void run_sweep(const SweepConfig* cfg, const DeviceDescriptions* devices, const SchedulerConfig* scheduler_cfg, FILE* fp);
+void run_sweep(const SweepConfig* cfg, const DeviceDescriptions* devices, const NetworkDescription* network, const SchedulerConfig* scheduler_cfg, FILE* fp);
 
 void update_result(SimResult* result, int decision, DecisionFactors* factors);
 

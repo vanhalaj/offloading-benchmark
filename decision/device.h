@@ -5,9 +5,6 @@ struct device_descriptions_t
 {
 	double cpu_freq_local; // hertz
 	double cpu_freq_offloaded; // hertz
-	double network_latency; // one way latency (seconds)
-	double bandwidth_up; // bits per second
-	double bandwidth_down; // bits per second
 	double power_load; // watts
 	double power_idle; // watts
 	double power_transmitter; // watts

@@ -10,7 +10,8 @@ static void write_csv_header(FILE* fp, const SweepConfig* cfg)
     {
         case SWEEP_CPU_FREQ_LOCAL: fprintf(fp, "f_local"); break;
         case SWEEP_CPU_FREQ_OFFLOADED: fprintf(fp, "f_off"); break;
-        case SWEEP_LATENCY: fprintf(fp, "d_latency"); break;
+        case SWEEP_LATENCY_AVG: fprintf(fp, "d_latency"); break;
+        case SWEEP_LATENCY_VAR: fprintf(fp, "d_latency (var)"); break;
         case SWEEP_BANDWIDTH_UP: fprintf(fp, "R_up"); break;
         case SWEEP_BANDWIDTH_DOWN: fprintf(fp, "R_down"); break;
         case SWEEP_POWER_LOAD: fprintf(fp, "P_load"); break;
@@ -48,15 +49,16 @@ static void log_results(FILE* fp, double x, SimResult results[])
     fprintf(fp, "\n");
 }
 
-static void apply_sweep(const SweepConfig* cfg, DeviceDescriptions* dev, SchedulerConfig* scheduler, double x)
+static void apply_sweep(const SweepConfig* cfg, DeviceDescriptions* dev, NetworkDescription* net, SchedulerConfig* scheduler, double x)
 {
     switch (cfg->type)
     {
     case SWEEP_CPU_FREQ_LOCAL: dev->cpu_freq_local = x; break;
     case SWEEP_CPU_FREQ_OFFLOADED: dev->cpu_freq_offloaded = x; break;
-    case SWEEP_LATENCY: dev->network_latency = x; break;
-    case SWEEP_BANDWIDTH_UP: dev->bandwidth_up = x; break;
-    case SWEEP_BANDWIDTH_DOWN: dev->bandwidth_down = x; break;
+    case SWEEP_LATENCY_AVG: net->latency_avg = x; break;
+    case SWEEP_LATENCY_VAR: net->latency_var = x; break;
+    case SWEEP_BANDWIDTH_UP: net->bandwidth_up = x; break;
+    case SWEEP_BANDWIDTH_DOWN: net->bandwidth_down = x; break;
     case SWEEP_POWER_LOAD: dev->power_load = x; break;
     case SWEEP_POWER_IDLE: dev->power_idle = x; break;
     case SWEEP_POWER_TRANSMITTER: dev->power_transmitter = x; break;
@@ -73,7 +75,7 @@ static void apply_sweep(const SweepConfig* cfg, DeviceDescriptions* dev, Schedul
     }
 }
 
-static TaskDescription* generate_tasks(const SchedulerConfig* scheduler)
+static TaskDescription* generate_tasks(const SchedulerConfig* scheduler, const NetworkDescription* net)
 {
     TaskDescription* task_queue = calloc(scheduler->task_count, sizeof(TaskDescription));
     if (!task_queue)
@@ -81,21 +83,22 @@ static TaskDescription* generate_tasks(const SchedulerConfig* scheduler)
         printf("Memory allocation for task queue failed\n");
         exit(EXIT_FAILURE);
     }
-    generate_task_queue(task_queue, scheduler);
+    generate_task_queue(task_queue, scheduler, net);
     return task_queue;
 }
 
-void run_sweep(const SweepConfig* cfg, const DeviceDescriptions* devices, const SchedulerConfig* scheduler_cfg, FILE* fp)
+void run_sweep(const SweepConfig* cfg, const DeviceDescriptions* devices, const NetworkDescription* network, const SchedulerConfig* scheduler_cfg, FILE* fp)
 {
     write_csv_header(fp, cfg);
 
     for (double x = cfg->start; x <= cfg->end; x += cfg->step)
     {
         DeviceDescriptions dev = *devices;
+        NetworkDescription net = *network;
         SchedulerConfig scheduler = *scheduler_cfg;
 
-        apply_sweep(cfg, &dev, &scheduler, x);
-        TaskDescription* task_queue = generate_tasks(&scheduler);
+        apply_sweep(cfg, &dev, &net, &scheduler, x);
+        TaskDescription* task_queue = generate_tasks(&scheduler, &net);
         SimResult results[DECISION_ALGORITHM_COUNT] = { 0 };
         int previous_decision[DECISION_ALGORITHM_COUNT] = { 0 };
 

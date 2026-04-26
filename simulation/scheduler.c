@@ -19,7 +19,7 @@ static inline double random_range_d(double min, double max)
 	return min + ((double)rand() / RAND_MAX) * (max - min);
 }
 
-void generate_task_queue(TaskDescription* task_queue, const SchedulerConfig* config)
+void generate_task_queue(TaskDescription* task_queue, const SchedulerConfig* config, const NetworkDescription* network)
 {
 	srand(config->generator_seed);
 
@@ -34,12 +34,17 @@ void generate_task_queue(TaskDescription* task_queue, const SchedulerConfig* con
 			? task_estimates[type](size) * config->complexity_multiplier
 			: random_range_d(config->avg_complexity - config->var_complexity, config->avg_complexity + config->var_complexity);
 
+		const double latency = random_range_d(network->latency_avg - network->latency_var, network->latency_avg + network->latency_var);
+
 		task_queue[i] = (TaskDescription){
 			.task_input_size = size,
 			.task_output_size = size,
 			.task_computation_size = complexity,
 			.dependent = dependency,
-			.offloadable = offloadability
+			.offloadable = offloadability,
+			.network_state = (NetworkState){
+				.latency = latency, .r_down = network->bandwidth_down, .r_up = network->bandwidth_up
+			}
 		};
 	}
 }

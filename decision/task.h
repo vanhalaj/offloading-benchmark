@@ -1,6 +1,7 @@
 #ifndef TASK_H
 #define TASK_H
 
+#include "network.h"
 #include <stdint.h>
 
 struct task_description_t
@@ -10,7 +11,7 @@ struct task_description_t
 	double task_computation_size; // cycles
 	int dependent; // 0 for independent, 1 for dependent on previous task
 	int offloadable; // 0 if can only be executed locally, 1 otherwise
-};
-typedef struct task_description_t TaskDescription;
+	NetworkState network_state;
+} typedef TaskDescription;
 
 #endif
