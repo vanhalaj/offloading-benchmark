@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include "lyapunov/lyapunov.h"
+#include "optimal/optimal.h"
 
 static void write_csv_header(FILE* fp, const SweepConfig* cfg)
 {
@@ -96,6 +97,9 @@ void run_sweep(const SweepConfig* cfg, const DeviceDescriptions* devices, const 
         apply_sweep(cfg, &dev, &scheduler, x);
         TaskDescription* task_queue = generate_tasks(&scheduler);
         SimResult results[DECISION_ALGORITHM_COUNT] = { 0 };
+        int previous_decision[DECISION_ALGORITHM_COUNT] = { 0 };
+
+        optimal_prepare(task_queue, scheduler.task_count);
 
         for (int task_index = 0; task_index < scheduler.task_count; task_index++)
         {
@@ -110,13 +114,15 @@ void run_sweep(const SweepConfig* cfg, const DeviceDescriptions* devices, const 
                     set_arrival_rate((double)results[ALWAYS_LOCAL].task_count / results[ALWAYS_LOCAL].total_delay);
                 }
 
-                DecisionFactors factors = calculate_factors(&dev, task, algo);
+                DecisionFactors factors = calculate_factors(&dev, task, previous_decision[algo]);
                 int decision = do_offload_decision(&factors, algo);
+                previous_decision[algo] = decision;
                 update_result(&results[algo], decision, &factors);
             }
         }
 
         log_results(fp, x, results);
+        optimal_free();
         free(task_queue);
     }
 }

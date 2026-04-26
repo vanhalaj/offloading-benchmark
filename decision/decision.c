@@ -2,11 +2,10 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "optimal/optimal.h"
 #include "greedy/greedy.h"
 #include "lyapunov/lyapunov.h"
 #include "rl/rl.h"
-
-static int previous_decision[DECISION_ALGORITHM_COUNT] = { 0 };
 
 const char* decision_algorithm_to_string(DecisionAlgorithm algorithm)
 {
@@ -16,6 +15,8 @@ const char* decision_algorithm_to_string(DecisionAlgorithm algorithm)
 		return "ALWAYS_LOCAL";
 	case ALWAYS_OFFLOAD:
 		return "ALWAYS_OFFLOAD";
+	case OPTIMAL:
+		return "OPTIMAL";
 	case GREEDY:
 		return "GREEDY";
 	case LYAPUNOV:
@@ -38,6 +39,9 @@ int do_offload_decision(const DecisionFactors* factors, DecisionAlgorithm algori
 		case ALWAYS_OFFLOAD:
 			decision = 1;
 			break;
+		case OPTIMAL:
+			decision = optimal_decision(factors);
+			break;
 		case GREEDY:
 			decision = greedy_decision(factors);
 			break;
@@ -49,7 +53,6 @@ int do_offload_decision(const DecisionFactors* factors, DecisionAlgorithm algori
 			break;
 	}
 
-	previous_decision[algorithm] = decision;
 	return decision;
 }
 
@@ -69,7 +72,7 @@ static void validate_data(const DeviceDescriptions* d, const TaskDescription* t)
 	}
 }
 
-DecisionFactors calculate_factors(const DeviceDescriptions* devices, const TaskDescription* task, DecisionAlgorithm algo)
+DecisionFactors calculate_factors(const DeviceDescriptions* devices, const TaskDescription* task, int previous_decision)
 {
 	validate_data(devices, task);
 
@@ -81,7 +84,7 @@ DecisionFactors calculate_factors(const DeviceDescriptions* devices, const TaskD
 	double d_rx = d_recv + devices->network_latency;
 
 	double d_local = d_comp_local;
-	double d_off = (1 - (task->dependent && previous_decision[algo])) * d_tx + d_comp_off + d_rx;
+	double d_off = (1 - (task->dependent && previous_decision)) * d_tx + d_comp_off + d_rx;
 
 	double e_comp_local = devices->power_load * d_comp_local;
 	double e_idle = devices->power_idle * d_comp_off;

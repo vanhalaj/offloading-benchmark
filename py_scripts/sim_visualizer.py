@@ -41,9 +41,10 @@ df = pd.read_csv(csv_path)
 strategies = [
     ("ALWAYS_LOCAL", 's', "Aina paikallisesti"),
     ("ALWAYS_OFFLOAD", 'o', "Ulkoista aina"),
+    ("OPTIMAL", 's', "Optimaalinen ratkaisu"),
     ("GREEDY", '^', "Ahne ulkoistaminen"),
     ("LYAPUNOV", 'x', "Lyapunov-optimointi"),
-    #("REINFORCEMENT_LEARNING", 'D')
+    ("REINFORCEMENT_LEARNING", 'D', "Q-vahvistusoppiminen")
 ]
 
 # ---------------------------------------------------------

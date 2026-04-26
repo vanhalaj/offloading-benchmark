@@ -21,11 +21,12 @@ struct decision_factors_t
 	double energy_idle; // joules
 } typedef DecisionFactors;
 
-#define DECISION_ALGORITHM_COUNT 5
+#define DECISION_ALGORITHM_COUNT 6
 enum decision_algorithm_t
 {
 	ALWAYS_LOCAL,
 	ALWAYS_OFFLOAD,
+	OPTIMAL,
 	GREEDY,
 	LYAPUNOV,
 	REINFORCEMENT_LEARNING
@@ -42,6 +43,6 @@ int do_offload_decision(const DecisionFactors* factors, DecisionAlgorithm algori
 /*!
  * Calculate decision factors from device and task variables
  */
-DecisionFactors calculate_factors(const DeviceDescriptions* devices, const TaskDescription* task, DecisionAlgorithm algo);
+DecisionFactors calculate_factors(const DeviceDescriptions* devices, const TaskDescription* task, int previous_decision);
 
 #endif // DECISION_H
