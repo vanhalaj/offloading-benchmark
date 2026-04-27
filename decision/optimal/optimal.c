@@ -10,7 +10,7 @@ char* decisions = NULL;
 int decision_count = 0;
 int decision_index = 0;
 
-#define BLOCK_SIZE 16
+#define BLOCK_SIZE 10
 
 static uint32_t solve_block(const DeviceDescriptions* dev, const TaskDescription* task_window, 
 	uint32_t window_size, int last_prev, double* total_max_delay, double* cumulative_delay)
