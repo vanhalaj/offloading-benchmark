@@ -6,6 +6,8 @@
 #define BINS 10
 #define ACTIONS 2
 
+#define USE_SMOOTH_AVERAGE_DELAY 1
+
 static double Q[BINS][BINS][ACTIONS] = { 0 };
 
 static double lr = 0.1;
@@ -49,14 +51,23 @@ static double compute_reward(const DecisionFactors* f, int action)
     return -energy - lambda * violation;
 }
 
-
 static void update_lambda(const DecisionFactors* f, int action)
 {
     double delay = action ? f->delay_offloaded : f->delay_local;
 
+#if USE_SMOOTH_AVERAGE_DELAY
+    static double avg_delay = 0.0;
+    static double beta = 0.01; // smoothing factor
+
+    avg_delay = (1 - beta) * avg_delay + beta * delay;
+
+    double violation = avg_delay - f->delay_local;
+    lambda += step_size * violation;
+#elif
     double violation = delay - f->delay_local;
 
     lambda += step_size * violation;
+#endif
 
     if (lambda < 0.0)
         lambda = 0.0;
@@ -72,29 +83,25 @@ int reinforcement_learning_decision(const DecisionFactors* f)
     {
         double reward = compute_reward(f, prev_action);
 
-        double max_next = fmax(Q[d_bin][e_bin][0],
-            Q[d_bin][e_bin][1]);
+        double max_next = fmax(Q[d_bin][e_bin][0], Q[d_bin][e_bin][1]);
 
         Q[prev_d_bin][prev_e_bin][prev_action] +=
-            lr * (reward + discount * max_next -
-                Q[prev_d_bin][prev_e_bin][prev_action]);
+            lr * (reward + discount * max_next - Q[prev_d_bin][prev_e_bin][prev_action]);
     }
 
     // eps-greedy choosing
     int action;
-
     if (f->delay_offloaded > f->delay_local * 1.5)
         action = 0;   // force local
-    else {
+    else 
+    {
         if (((double)rand() / RAND_MAX) < epsilon)
             action = rand() % ACTIONS;
         else
             action = (Q[d_bin][e_bin][1] > Q[d_bin][e_bin][0]) ? 1 : 0;
     }
-    // Update lambda AFTER choosing action
-    update_lambda(f, action);
 
-    // Store transition for next step
+    update_lambda(f, action);
     prev_d_bin = d_bin;
     prev_e_bin = e_bin;
     prev_action = action;
