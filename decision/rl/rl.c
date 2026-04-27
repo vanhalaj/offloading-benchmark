@@ -1,14 +1,13 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 #include "rl.h"
 
 #define BINS 10
 #define ACTIONS 2
 
-// Q(z, d)
 static double Q[BINS][BINS][ACTIONS] = { 0 };
 
-// RL parameters
 static double lr = 0.1;
 static double discount = 0.9;
 static double epsilon = 0.05;
@@ -16,12 +15,10 @@ static double epsilon = 0.05;
 static double lambda = 0.0;
 static double step_size = 0.01;
 
-// --- Previous transition memory ---
 static int prev_d_bin = -1;
 static int prev_e_bin = -1;
 static int prev_action = -1;
 
-// --- Discretization ---
 static int discretize(double value, double max)
 {
     if (max <= 0.0) return 0;
@@ -32,14 +29,15 @@ static int discretize(double value, double max)
     return bin;
 }
 
-// --- State z_t ---
 static void get_state(const DecisionFactors* f, int* d_bin, int* e_bin)
 {
-    double delay_ratio = f->delay_offloaded / (f->delay_local + 1e-6);
-    double energy_ratio = f->energy_offloaded / (f->energy_local + 1e-6);
+    double delay_ratio = f->delay_offloaded / (f->delay_local);
+    double energy_ratio = f->energy_offloaded / (f->energy_local);
 
     *d_bin = discretize(delay_ratio, 2.0);
-    *e_bin = discretize(energy_ratio, 2.0);
+    *e_bin = discretize(energy_ratio, 0.5);
+    //printf("%f,%f,%d,%d\n", delay_ratio, energy_ratio, *d_bin, *e_bin);
+    //printf("%d,%f,%f,%f\n", f->task.task_input_size, f->task.task_computation_size, f->energy_local, f->energy_offloaded);
 }
 
 static double compute_reward(const DecisionFactors* f, int action)
@@ -47,13 +45,15 @@ static double compute_reward(const DecisionFactors* f, int action)
     double energy = action ? f->energy_offloaded : f->energy_local;
     double delay = action ? f->delay_offloaded : f->delay_local;
 
-    double violation = delay - f->delay_local;
-    if (violation < 0.0)
-        violation = 0.0;
+    double reward = -energy;
+    
+    if (delay > f->delay_local)
+    {
+        double v = (delay - f->delay_local) / f->delay_local;
+        reward -= lambda * v;
+    }
 
-    double penalty = lambda * violation;
-
-    return -(energy + penalty);
+    return reward;
 }
 
 
@@ -69,14 +69,12 @@ static void update_lambda(const DecisionFactors* f, int action)
         lambda = 0.0;
 }
 
-
-// --- MAIN RL FUNCTION ---
 int reinforcement_learning_decision(const DecisionFactors* f)
 {
     int d_bin, e_bin;
     get_state(f, &d_bin, &e_bin);
 
-    // --- Q-learning update for previous transition ---
+    // update Q-table for previous transition
     if (prev_action != -1)
     {
         double reward = compute_reward(f, prev_action);
@@ -89,10 +87,10 @@ int reinforcement_learning_decision(const DecisionFactors* f)
                 Q[prev_d_bin][prev_e_bin][prev_action]);
     }
 
-    // --- Choose action (eps-greedy) ---
+    // eps-greedy choosing
     int action;
 
-    if (f->delay_offloaded > f->delay_local * 1.25)
+    if (f->delay_offloaded > f->delay_local * 1.5)
         action = 0;   // force local
     else {
         if (((double)rand() / RAND_MAX) < epsilon)
