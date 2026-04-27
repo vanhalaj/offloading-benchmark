@@ -24,8 +24,8 @@ const DeviceDescriptions devices = {
 };
 
 const NetworkDescription network = {
-    .latency_avg = 2.0 ms,
-    .latency_var = 1.0 ms,
+    .latency_avg = 10.0 ms,
+    .latency_var = 3.0 ms,
     .bandwidth_up = 100.0 Mbps,
     .bandwidth_down = 100.0 Mbps
 };
@@ -34,8 +34,8 @@ const SchedulerConfig scheduler = {
     .task_count = 4096,
     .avg_size = 640000,
     .var_size = 630000,
-    .avg_complexity = 5000000.0,
-    .var_complexity = 50000,
+    .avg_complexity = 10000000.0,
+    .var_complexity = 2500000,
     .complexity_multiplier = 8.0,
     .complexity_mode = COMPLEXITY_ESTIMATE,
     .dependency_probability = 0.35f,
@@ -43,8 +43,9 @@ const SchedulerConfig scheduler = {
 };
 
 const SweepConfig sweeps[] = {
-    //{.type = SWEEP_TASK_COMPLEXITY_AVG, .start = 100000, .end = 10000000, .step = 300000 },
-    {.type = SWEEP_LATENCY_AVG, .start = 1 ms, .end = 40 ms, .step = 1 ms },
+    //{.type = SWEEP_TASK_COMPLEXITY_AVG, .start = 300000, .end = 20000000, .step = 300000 },
+    {.type = SWEEP_LATENCY_AVG, .start = 4 ms, .end = 40 ms, .step = 1 ms },
+    {.type = SWEEP_LATENCY_VAR, .start = 1 ms, .end = 20 ms, .step = 1 ms },
     {.type = SWEEP_CPU_FREQ_LOCAL, .start = 500 MHz, .end = 3000 MHz, .step = 100 MHz },
     {.type = SWEEP_LATENCY_AVG, .start = 1 ms, .end = 50 ms, .step = 1 ms }
 };
