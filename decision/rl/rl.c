@@ -15,7 +15,7 @@ static double discount = 0.9;
 static double epsilon = 0.05;
 
 static double lambda = 0.0;
-static double step_size = 0.01;
+static double step_size = 0.05;
 
 static int prev_d_bin = -1;
 static int prev_e_bin = -1;
@@ -63,7 +63,7 @@ static void update_lambda(const DecisionFactors* f, int action)
 
     double violation = avg_delay - f->delay_local;
     lambda += step_size * violation;
-#elif
+#else
     double violation = delay - f->delay_local;
 
     lambda += step_size * violation;
