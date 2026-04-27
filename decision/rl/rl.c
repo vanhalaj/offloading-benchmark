@@ -1,10 +1,22 @@
+/*
+ * Online algorithm for offloading decision, utilizing reinforcement learning / Q-learning.
+ *
+ * Based on algorithm presented in:
+ * H. Zhou, K. Jiang, X. Liu, X. Li and V.C.M. Leung. Deep Reinforcement Learning for Energy-Efficient 
+ * Computation Offloading in Mobile-Edge Computing. IEEE Internet of Things Journal, 
+ * vol. 9, no. 2, pp. 1517–1530, 2022. doi: 10.1109/JIOT.2021.3091142
+ */
+
+#include "rl.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "rl.h"
 
 #define BINS 10
 #define ACTIONS 2
+
+// step size for changing value of lambda
+#define STEP_SIZE 0.05
 
 #define USE_SMOOTH_AVERAGE_DELAY 1
 
@@ -15,7 +27,6 @@ static double discount = 0.9;
 static double epsilon = 0.05;
 
 static double lambda = 0.0;
-static double step_size = 0.05;
 
 static int prev_d_bin = -1;
 static int prev_e_bin = -1;
@@ -62,11 +73,11 @@ static void update_lambda(const DecisionFactors* f, int action)
     avg_delay = (1 - beta) * avg_delay + beta * delay;
 
     double violation = avg_delay - f->delay_local;
-    lambda += step_size * violation;
+    lambda += STEP_SIZE * violation;
 #else
     double violation = delay - f->delay_local;
 
-    lambda += step_size * violation;
+    lambda += STEP_SIZE * violation;
 #endif
 
     if (lambda < 0.0)
