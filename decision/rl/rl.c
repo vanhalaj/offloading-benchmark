@@ -45,15 +45,8 @@ static double compute_reward(const DecisionFactors* f, int action)
     double energy = action ? f->energy_offloaded : f->energy_local;
     double delay = action ? f->delay_offloaded : f->delay_local;
 
-    double reward = -energy;
-    
-    if (delay > f->delay_local)
-    {
-        double v = (delay - f->delay_local) / f->delay_local;
-        reward -= lambda * v;
-    }
-
-    return reward;
+    double violation = (delay - f->delay_local);// / f->delay_local;
+    return -energy - lambda * violation;
 }
 
 
