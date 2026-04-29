@@ -17,5 +17,3 @@ add_subdirectory(task_examples)
 
 add_subdirectory(simulation)
 add_subdirectory(profiler)
-add_subdirectory(client)
-add_subdirectory(server)
