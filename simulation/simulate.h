@@ -8,6 +8,8 @@
 #include "scheduler.h"
 #include "network.h"
 
+typedef struct testcase_t TestCase;
+
 enum sweep_type_t
 {
     SWEEP_CPU_FREQ_LOCAL,
@@ -43,9 +45,6 @@ struct sim_result_t
     int task_count;
 } typedef SimResult;
 
-
-void run_sweep(const SweepConfig* cfg, const DeviceDescriptions* devices, const NetworkDescription* network, const SchedulerConfig* scheduler_cfg, FILE* fp);
-
-void update_result(SimResult* result, int decision, DecisionFactors* factors);
+void run_testcase(const TestCase* specs);
 
 #endif

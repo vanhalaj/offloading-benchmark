@@ -3,11 +3,16 @@
 #include <stdlib.h>
 #include "lyapunov/lyapunov.h"
 #include "optimal/optimal.h"
+#include "testcase.h"
 
-static void write_csv_header(FILE* fp, const SweepConfig* cfg)
+static void write_csv_header(FILE* fp, const SweepConfig* outer, const SweepConfig* inner, int nested)
 {
-    switch (cfg->type)
+    // first write outer and then inner (if nested=1) sweep param name
+    for (int i = 0; i <= nested; i++)
     {
+        const SweepConfig* cfg = i == 0 ? outer : inner;
+        switch (cfg->type)
+        {
         case SWEEP_CPU_FREQ_LOCAL: fprintf(fp, "f_local"); break;
         case SWEEP_CPU_FREQ_OFFLOADED: fprintf(fp, "f_off"); break;
         case SWEEP_LATENCY_AVG: fprintf(fp, "d_latency"); break;
@@ -23,6 +28,7 @@ static void write_csv_header(FILE* fp, const SweepConfig* cfg)
         case SWEEP_TASK_SIZE_AVG: fprintf(fp, "L_T"); break;
         case SWEEP_TASK_SIZE_VAR: fprintf(fp, "L_T (var)"); break;
         case SWEEP_TASK_DEPENDENCY_PROB: fprintf(fp, "dependency_rate"); break;
+        }
     }
     for (DecisionAlgorithm algo = 0; algo < DECISION_ALGORITHM_COUNT; algo++)
     {
@@ -35,9 +41,11 @@ static void write_csv_header(FILE* fp, const SweepConfig* cfg)
     fprintf(fp, "\n");
 }
 
-static void log_results(FILE* fp, double x, SimResult results[])
+static void log_results(FILE* fp, double x, double y, int nested, SimResult results[])
 {
     fprintf(fp, "%f", x);
+    if (nested) fprintf(fp, "%f", y);
+
     for (DecisionAlgorithm algo = 0; algo < DECISION_ALGORITHM_COUNT; algo++)
     {
         SimResult* result = &results[algo];
@@ -75,7 +83,7 @@ static void apply_sweep(const SweepConfig* cfg, DeviceDescriptions* dev, Network
     }
 }
 
-static TaskDescription* generate_tasks(const SchedulerConfig* scheduler, const NetworkDescription* net)
+static TaskDescription* allocate_task_queue(const SchedulerConfig* scheduler)
 {
     TaskDescription* task_queue = calloc(scheduler->task_count, sizeof(TaskDescription));
     if (!task_queue)
@@ -83,57 +91,86 @@ static TaskDescription* generate_tasks(const SchedulerConfig* scheduler, const N
         printf("Memory allocation for task queue failed\n");
         exit(EXIT_FAILURE);
     }
-    generate_task_queue(task_queue, scheduler, net);
     return task_queue;
 }
 
-void run_sweep(const SweepConfig* cfg, const DeviceDescriptions* devices, const NetworkDescription* network, const SchedulerConfig* scheduler_cfg, FILE* fp)
-{
-    write_csv_header(fp, cfg);
-
-    for (double x = cfg->start; x <= cfg->end; x += cfg->step)
-    {
-        DeviceDescriptions dev = *devices;
-        NetworkDescription net = *network;
-        SchedulerConfig scheduler = *scheduler_cfg;
-
-        apply_sweep(cfg, &dev, &net, &scheduler, x);
-        TaskDescription* task_queue = generate_tasks(&scheduler, &net);
-        SimResult results[DECISION_ALGORITHM_COUNT] = { 0 };
-        int previous_decision[DECISION_ALGORITHM_COUNT] = { 0 };
-
-        optimal_prepare(&dev, task_queue, scheduler.task_count);
-
-        for (int task_index = 0; task_index < scheduler.task_count; task_index++)
-        {
-            TaskDescription* task = &task_queue[task_index];
-
-            for (DecisionAlgorithm algo = 0; algo < DECISION_ALGORITHM_COUNT; algo++)
-            {
-                // TODO should these two inner loops other way around so one algorithm is went over completely
-                // before moving onto the next one?
-                if (algo == LYAPUNOV)
-                {
-                    set_arrival_rate((double)results[ALWAYS_LOCAL].task_count / results[ALWAYS_LOCAL].total_delay);
-                }
-
-                DecisionFactors factors = calculate_factors(&dev, task, previous_decision[algo]);
-                int decision = do_offload_decision(&factors, algo);
-                previous_decision[algo] = decision;
-                update_result(&results[algo], decision, &factors);
-            }
-        }
-
-        log_results(fp, x, results);
-        optimal_free();
-        free(task_queue);
-    }
-}
-
-void update_result(SimResult* result, int decision, DecisionFactors* factors)
+static void update_result(SimResult* result, int decision, DecisionFactors* factors)
 {
     result->offloaded_count += decision;
     result->task_count += 1;
     result->total_energy += ((1 - decision) * factors->energy_local + decision * factors->energy_offloaded);
     result->total_delay += ((1 - decision) * factors->delay_local + decision * factors->delay_offloaded);
+}
+
+static void run_sweep(const TestCase* test, FILE* fp)
+{
+    const int nested = test->nested;
+    write_csv_header(fp, &test->outer_sweep, &test->inner_sweep, nested);
+    TaskDescription* task_queue = allocate_task_queue(&test->scheduler);
+
+    for (double x = test->outer_sweep.start; x <= test->outer_sweep.end; x += test->outer_sweep.step)
+    {
+        DeviceDescriptions dev = test->devices;
+        NetworkDescription net = test->network;
+        SchedulerConfig scheduler = test->scheduler;
+        apply_sweep(&test->outer_sweep, &dev, &net, &scheduler, x);
+
+        // if nested=0, only run once
+        for (double y = test->inner_sweep.start; y <= test->inner_sweep.end || (!nested); y += test->inner_sweep.step)
+        {
+            if (nested)
+            {
+                apply_sweep(&test->inner_sweep, &dev, &net, &scheduler, y);
+            }
+            generate_task_queue(task_queue, &scheduler, &net);
+            optimal_prepare(&dev, task_queue, scheduler.task_count);
+
+            SimResult results[DECISION_ALGORITHM_COUNT] = { 0 };
+            int previous_decision[DECISION_ALGORITHM_COUNT] = { 0 };
+
+            // Loop over tasks and find decision for each algorithm
+            for (int task_index = 0; task_index < scheduler.task_count; task_index++)
+            {
+                TaskDescription* task = &task_queue[task_index];
+                for (DecisionAlgorithm algo = 0; algo < DECISION_ALGORITHM_COUNT; algo++)
+                {
+                    if (algo == LYAPUNOV)
+                    {
+                        set_arrival_rate((double)results[ALWAYS_LOCAL].task_count / results[ALWAYS_LOCAL].total_delay);
+                    }
+
+                    DecisionFactors factors = calculate_factors(&dev, task, previous_decision[algo]);
+                    int decision = do_offload_decision(&factors, algo);
+                    
+                    previous_decision[algo] = decision;
+                    update_result(&results[algo], decision, &factors);
+                }
+            }
+
+            log_results(fp, x, y, nested, results);
+            optimal_free();
+
+            if (!nested)
+            {
+                break;
+            }
+        }
+    }
+
+    free(task_queue);
+}
+
+void run_testcase(const TestCase* specs)
+{
+    FILE* fp = fopen(specs->file_name, "w");
+    if (!fp)
+    {
+        printf("Failed to open file %s!\n", specs->file_name);
+        exit(EXIT_FAILURE);
+    }
+
+    run_sweep(specs, fp);
+
+    fflush(fp);
+    fclose(fp);
 }

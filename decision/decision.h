@@ -21,7 +21,6 @@ struct decision_factors_t
 	double energy_idle; // joules
 } typedef DecisionFactors;
 
-#define DECISION_ALGORITHM_COUNT 6
 enum decision_algorithm_t
 {
 	ALWAYS_LOCAL,
@@ -29,7 +28,8 @@ enum decision_algorithm_t
 	OPTIMAL,
 	GREEDY,
 	LYAPUNOV,
-	REINFORCEMENT_LEARNING
+	REINFORCEMENT_LEARNING,
+	DECISION_ALGORITHM_COUNT
 } typedef DecisionAlgorithm;
 
 const char* decision_algorithm_to_string(DecisionAlgorithm algorithm);
