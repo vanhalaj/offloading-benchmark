@@ -6,17 +6,19 @@
 #include "decision.h"
 
 #include "testcases/test_latency.h"
-
-const SweepConfig sweeps[] = {
-    //{.type = SWEEP_TASK_COMPLEXITY_AVG, .start = 300000, .end = 20000000, .step = 300000 },
-    {.type = SWEEP_LATENCY_AVG, .start = 4 ms, .end = 40 ms, .step = 1 ms },
-    {.type = SWEEP_LATENCY_VAR, .start = 1 ms, .end = 20 ms, .step = 1 ms },
-    {.type = SWEEP_CPU_FREQ_LOCAL, .start = 500 MHz, .end = 3000 MHz, .step = 100 MHz },
-    {.type = SWEEP_LATENCY_AVG, .start = 1 ms, .end = 50 ms, .step = 1 ms }
-};
+#include "testcases/test_latency_var.h"
+#include "testcases/test_complexity.h"
+#include "testcases/test_cpu_freq_local.h"
+#include "testcases/test_bandwidth_up.h"
+#include "testcases/test_dependency.h"
 
 const TestCase* tests[] = {
-    &test_latency
+    &test_latency,
+    &test_latency_var,
+    &test_complexity,
+    &test_cpu_freq_local,
+    &test_bandwidth_up,
+    &test_dependency
 };
 const int test_count = sizeof(tests) / sizeof(TestCase*);
 

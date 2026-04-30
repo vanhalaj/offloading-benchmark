@@ -1,10 +1,10 @@
-#ifndef TEST_LATENCY_H
-#define TEST_LATENCY_H
+#ifndef TEST_COMPLEXITY_H
+#define TEST_COMPLEXITY_H
 
 #include "testcase.h"
 
-const TestCase test_latency = {
-    .test_name = "latency",
+const TestCase test_complexity = {
+    .test_name = "complexity",
     .devices = {
         .cpu_freq_local = 700.0 MHz,
         .cpu_freq_offloaded = 3600.0 MHz,
@@ -23,17 +23,18 @@ const TestCase test_latency = {
         .task_count = 4096,
         .avg_size = 640000,
         .var_size = 630000,
-        .complexity_multiplier = 8.0,
-        .complexity_mode = COMPLEXITY_ESTIMATE,
+        .avg_complexity = 10000000.0,
+        .var_complexity = 250000,
+        .complexity_mode = COMPLEXITY_RANDOM,
         .dependency_probability = 0.35f,
         .generator_seed = 12345U
     },
     .nested = 0,
     .outer_sweep = {
-        .type = SWEEP_LATENCY_AVG,
-        .start = 4 ms,
-        .end = 50 ms,
-        .step = 2 ms
+        .type = SWEEP_TASK_COMPLEXITY_AVG,
+        .start = 8000000,
+        .end = 20000000,
+        .step = 300000
     }
 };
 

@@ -1,10 +1,10 @@
-#ifndef TEST_LATENCY_H
-#define TEST_LATENCY_H
+#ifndef TEST_CPU_FREQ_LOCAL_H
+#define TEST_CPU_FREQ_LOCAL_H
 
 #include "testcase.h"
 
-const TestCase test_latency = {
-    .test_name = "latency",
+const TestCase test_cpu_freq_local = {
+    .test_name = "cpu_freq_local",
     .devices = {
         .cpu_freq_local = 700.0 MHz,
         .cpu_freq_offloaded = 3600.0 MHz,
@@ -30,10 +30,10 @@ const TestCase test_latency = {
     },
     .nested = 0,
     .outer_sweep = {
-        .type = SWEEP_LATENCY_AVG,
-        .start = 4 ms,
-        .end = 50 ms,
-        .step = 2 ms
+        .type = SWEEP_CPU_FREQ_LOCAL,
+        .start = 500 MHz,
+        .end = 3000 MHz,
+        .step = 100 MHz
     }
 };
 
