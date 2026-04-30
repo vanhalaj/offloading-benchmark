@@ -22,12 +22,12 @@ if not csv_files:
 # Plotting functions
 # ---------------------------------------------------------
 strategies = [
-    ("ALWAYS_LOCAL", 's', "Aina paikallisesti"),
-    ("ALWAYS_OFFLOAD", 'o', "Ulkoista aina"),
-    #("OPTIMAL", 's', "Optimaalinen ratkaisu"),
-    ("GREEDY", '^', "Ahne ulkoistaminen"),
-    ("LYAPUNOV", 'x', "Lyapunov-optimointi"),
-    ("REINFORCEMENT_LEARNING", 'D', "Q-vahvistusoppiminen")
+    ("ALWAYS_LOCAL", 's', ':', "Aina paikallisesti"),
+    ("ALWAYS_OFFLOAD", 'o', ':', "Ulkoista aina"),
+    #("OPTIMAL", 's', '-', "Optimaalinen ratkaisu"),
+    ("GREEDY", '^', '-', "Ahne ulkoistaminen"),
+    ("LYAPUNOV", 'x', '-', "Lyapunov-optimointi"),
+    ("REINFORCEMENT_LEARNING", 'D', '-', "Q-vahvistusoppiminen")
 ]
 
 fig, axes = plt.subplots(3, 1, figsize=(10, 15))
@@ -44,7 +44,7 @@ def plot_csv(file_name):
     df = pd.read_csv(csv_path)
     
     sweep_col = df.columns[0]
-    for strategy, marker_type, label in strategies:
+    for strategy, marker_type, line_style, label in strategies:
         e_col = f"{strategy}_e_total"
         d_col = f"{strategy}_d_total"
         offload_col = f"{strategy}_offload_count"
@@ -52,26 +52,36 @@ def plot_csv(file_name):
         # offloading ratio
         ratio = df[offload_col] / df[task_col]
 
-        energy_ax.plot(df[sweep_col], df[e_col], marker=marker_type, markersize=5, label=label)
-        delay_ax.plot(df[sweep_col], df[d_col], marker=marker_type, markersize=5, label=label)
-        ratio_ax.plot(df[sweep_col], ratio, marker=marker_type, markersize=5, label=label)
+        energy_ax.plot(df[sweep_col], df[e_col], marker=marker_type, linestyle=line_style, markersize=5, label=label)
+        delay_ax.plot(df[sweep_col], df[d_col], marker=marker_type, linestyle=line_style, markersize=5, label=label)
+        ratio_ax.plot(df[sweep_col], ratio, marker=marker_type, linestyle=line_style, markersize=5, label=label)
 
     if SHOW_SUB_TITLES:
-        energy_ax.set_title(f"Total Energy vs {sweep_col}")
-        delay_ax.set_title(f"Total Delay vs {sweep_col}")
-        ratio_ax.set_title(f"Offloading Ratio vs {sweep_col}")
+        # energy_ax.set_title(f"Total Energy vs {sweep_col}")
+        energy_ax.set_title(f"Kokonaisenergia vs {sweep_col}")
+        # delay_ax.set_title(f"Total Delay vs {sweep_col}")
+        delay_ax.set_title(f"Kokonaisviive vs {sweep_col}")
+        # ratio_ax.set_title(f"Offloading Ratio vs {sweep_col}")
+        ratio_ax.set_title(f"Ulkoistamisen osuus vs {sweep_col}")
 
     energy_ax.set_xlabel(sweep_col)
-    energy_ax.set_ylabel("Total Energy (J)")
+    # energy_ax.set_ylabel("Total Energy (J)")
+    energy_ax.set_ylabel("Kokonaisenergia (J)")
     energy_ax.legend()
 
     delay_ax.set_xlabel(sweep_col)
-    delay_ax.set_ylabel("Total Delay (s)")
+    # delay_ax.set_ylabel("Total Delay (s)")
+    delay_ax.set_ylabel("Kokonaisviive (s)")
     delay_ax.legend()
 
     ratio_ax.set_xlabel(sweep_col)
-    ratio_ax.set_ylabel("Offloading Ratio")
+    # ratio_ax.set_ylabel("Offloading Ratio")
+    ratio_ax.set_ylabel("Ulkoistamisen osuus")
     ratio_ax.legend()
+
+    # no empty space on left and right sides
+    for ax in axes:
+        ax.margins(x=0)
 
     fig.suptitle(f"Viewing file {file_name} ({current_index+1}/{len(csv_files)})", fontsize=14)
 
