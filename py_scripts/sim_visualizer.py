@@ -83,7 +83,10 @@ def plot_csv(file_name):
     for ax in axes:
         ax.margins(x=0)
 
-    fig.suptitle(f"Viewing file {file_name} ({current_index+1}/{len(csv_files)})", fontsize=14)
+    fig.canvas.manager.set_window_title(f"Viewing file {file_name} ({current_index+1}/{len(csv_files)})")
+
+    name_without_ext = os.path.splitext(file_name)[0]
+    fig.canvas.get_default_filename = lambda: f"{name_without_ext}.png"
 
     plt.tight_layout()
     plt.show()
