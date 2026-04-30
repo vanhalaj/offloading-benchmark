@@ -5,8 +5,6 @@
 #include "optimal/optimal.h"
 #include "testcase.h"
 
-#define SKIP_OPTIMAL 1
-
 static void write_csv_header(FILE* fp, const SweepConfig* outer, const SweepConfig* inner, int nested)
 {
     // first write outer and then inner (if nested=1) sweep param name
@@ -125,9 +123,7 @@ static void run_sweep(const TestCase* test, FILE* fp)
                 apply_sweep(&test->inner_sweep, &dev, &net, &scheduler, y);
             }
             generate_task_queue(task_queue, &scheduler, &net);
-            #if !(SKIP_OPTIMAL)
             optimal_prepare(&dev, task_queue, scheduler.task_count);
-            #endif
 
             SimResult results[DECISION_ALGORITHM_COUNT] = { 0 };
             int previous_decision[DECISION_ALGORITHM_COUNT] = { 0 };
@@ -142,12 +138,6 @@ static void run_sweep(const TestCase* test, FILE* fp)
                     {
                         set_arrival_rate((double)results[ALWAYS_LOCAL].task_count / results[ALWAYS_LOCAL].total_delay);
                     }
-                    #if SKIP_OPTIMAL
-                    else if (algo == OPTIMAL)
-                    {
-                        continue;
-                    }
-                    #endif
 
                     DecisionFactors factors = calculate_factors(&dev, task, previous_decision[algo]);
                     int decision = do_offload_decision(&factors, algo);

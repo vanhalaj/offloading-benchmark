@@ -10,6 +10,7 @@ char* decisions = NULL;
 int decision_count = 0;
 int decision_index = 0;
 
+#define DISABLE_OPTIMAL 1
 #define BLOCK_SIZE 10
 
 static uint32_t solve_block(const DeviceDescriptions* dev, const TaskDescription* task_window, 
@@ -94,6 +95,10 @@ void optimal_prepare(const DeviceDescriptions* dev, const TaskDescription* tasks
 		exit(EXIT_FAILURE);
 	}
 	decision_count = task_count;
+
+	#if DISABLE_OPTIMAL
+	return;
+	#endif
 
 	double max_delay = 0.0;
 	double cumulative_delay = 0.0;
