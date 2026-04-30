@@ -27,7 +27,7 @@ int main(void)
     for (int i = 0; i < test_count; i++)
     {
         const TestCase* test = tests[i];
-        printf("Running test %s ... ", test->file_name);
+        printf("Running test %s ... ", test->test_name);
         
         run_testcase(test);
         printf("DONE\n");

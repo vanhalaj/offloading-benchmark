@@ -162,10 +162,13 @@ static void run_sweep(const TestCase* test, FILE* fp)
 
 void run_testcase(const TestCase* specs)
 {
-    FILE* fp = fopen(specs->file_name, "w");
+    char file_name[64] = { 0 };
+    testcase_get_file_name(specs, file_name, 64);
+
+    FILE* fp = fopen(file_name, "w");
     if (!fp)
     {
-        printf("Failed to open file %s!\n", specs->file_name);
+        printf("Failed to open file %s!\n", file_name);
         exit(EXIT_FAILURE);
     }
 

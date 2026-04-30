@@ -4,7 +4,7 @@
 #include "testcase.h"
 
 const TestCase test_latency = {
-    .file_name = "latency.csv",
+    .test_name = "latency",
     .devices = {
         .cpu_freq_local = 700.0 MHz,
         .cpu_freq_offloaded = 3600.0 MHz,
