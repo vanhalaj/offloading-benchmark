@@ -1,34 +1,14 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+from keys import get_target
 
 # ---------------------------------------------------------
 # Find CSV from simulation dir in paths.txt
 # ---------------------------------------------------------
-PATHS_FILE = "paths.txt"
-KEY = "SIMULATION"
+sim_dir = get_target("SIMULATION")
 
-sim_dir = None
-with open(PATHS_FILE, "r") as f:
-    for line in f:
-        line = line.strip()
-        if not line or "=" not in line:
-            continue
-
-        k, _, v = line.partition("=")
-        if k.strip() == KEY:
-            sim_dir = v.strip()
-            break
-
-if sim_dir is None:
-    raise RuntimeError(f"Key '{KEY}' not found in {PATHS_FILE}")
-
-sim_dir = os.path.abspath(sim_dir)
-
-if not os.path.isdir(sim_dir):
-    raise RuntimeError(f"Simulation directory does not exist: {sim_dir}")
-
-csv_path = os.path.join(sim_dir, "results.csv")
+csv_path = os.path.join(sim_dir, "latency.csv")
 
 if not os.path.isfile(csv_path):
     raise RuntimeError(f"CSV file not found in simulation directory: {csv_path}")
@@ -41,7 +21,7 @@ df = pd.read_csv(csv_path)
 strategies = [
     ("ALWAYS_LOCAL", 's', "Aina paikallisesti"),
     ("ALWAYS_OFFLOAD", 'o', "Ulkoista aina"),
-    ("OPTIMAL", 's', "Optimaalinen ratkaisu"),
+    #("OPTIMAL", 's', "Optimaalinen ratkaisu"),
     ("GREEDY", '^', "Ahne ulkoistaminen"),
     ("LYAPUNOV", 'x', "Lyapunov-optimointi"),
     ("REINFORCEMENT_LEARNING", 'D', "Q-vahvistusoppiminen")

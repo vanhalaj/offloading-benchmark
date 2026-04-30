@@ -1,39 +1,18 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from keys import get_target
 
 # ---------------------------------------------------------
 # Find CSV from profiler dir in paths.txt
 # ---------------------------------------------------------
-PATHS_FILE = "paths.txt"
-KEY = "PROFILER"
-
-profiler_dir = None
-with open(PATHS_FILE, "r") as f:
-    for line in f:
-        line = line.strip()
-        if not line or "=" not in line:
-            continue
-
-        k, _, v = line.partition("=")
-        if k.strip() == KEY:
-            profiler_dir = v.strip()
-            break
-
-if profiler_dir is None:
-    raise RuntimeError(f"Key '{KEY}' not found in {PATHS_FILE}")
-
-profiler_dir = os.path.abspath(profiler_dir)
-
-if not os.path.isdir(profiler_dir):
-    raise RuntimeError(f"Profiler directory does not exist: {profiler_dir}")
+profiler_dir = get_target("PROFILER")
 
 csv_path = os.path.join(profiler_dir, "results.csv")
 
 if not os.path.isfile(csv_path):
     raise RuntimeError(f"CSV file not found in profiler directory: {csv_path}")
 
-print(f"Using profiler directory: {profiler_dir}")
 print(f"Loading CSV: {csv_path}")
 
 # ---------------------------------------------------------
