@@ -33,8 +33,8 @@ const TestCase test_complexity_size = {
     .outer_sweep = {
         .type = SWEEP_TASK_COMPLEXITY_AVG,
         .start = 100000,
-        .end = 100000000,
-        .step = 2000000
+        .end = 150000000,
+        .step = 3000000
     },
     .inner_sweep = {
         .type = SWEEP_TASK_SIZE_AVG,
