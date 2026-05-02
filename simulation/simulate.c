@@ -10,6 +10,7 @@ static void write_csv_header(FILE* fp, const SweepConfig* outer, const SweepConf
     // first write outer and then inner (if nested=1) sweep param name
     for (int i = 0; i <= nested; i++)
     {
+        if (i == 1) fprintf(fp, ",");
         const SweepConfig* cfg = i == 0 ? outer : inner;
         switch (cfg->type)
         {
@@ -44,7 +45,7 @@ static void write_csv_header(FILE* fp, const SweepConfig* outer, const SweepConf
 static void log_results(FILE* fp, double x, double y, int nested, SimResult results[])
 {
     fprintf(fp, "%f", x);
-    if (nested) fprintf(fp, "%f", y);
+    if (nested) fprintf(fp, ",%f", y);
 
     for (DecisionAlgorithm algo = 0; algo < DECISION_ALGORITHM_COUNT; algo++)
     {

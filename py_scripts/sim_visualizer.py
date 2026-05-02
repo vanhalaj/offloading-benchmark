@@ -16,7 +16,7 @@ csv_files = [
 ] 
 
 if not csv_files:
-    raise RuntimeError(f"No CSV files found in simulation directory: {csv_path}")
+    raise RuntimeError(f"No CSV files found in simulation directory: {csv_files}")
 
 # ---------------------------------------------------------
 # Plotting functions
@@ -31,17 +31,16 @@ strategies = [
 ]
 
 fig, axes = plt.subplots(3, 1, figsize=(10, 15))
-energy_ax, delay_ax, ratio_ax = axes
 current_index = 0
 
-def plot_csv(file_name):
-    """Plot csv with given file name"""
-    energy_ax.clear()
-    delay_ax.clear()
-    ratio_ax.clear()
-
+def plot_single(file_name):
+    """Plot csv with given file name, with single sweep parameter"""
     csv_path = os.path.join(sim_dir, file_name)
     df = pd.read_csv(csv_path)
+
+    fig.clf()
+    axes = fig.subplots(len(nested_strategies), 1)
+    energy_ax, delay_ax, ratio_ax = axes
     
     sweep_col = df.columns[0]
     for strategy, marker_type, line_style, label in strategies:
@@ -83,13 +82,87 @@ def plot_csv(file_name):
     for ax in axes:
         ax.margins(x=0)
 
-    fig.canvas.manager.set_window_title(f"Viewing file {file_name} ({current_index+1}/{len(csv_files)})")
+    plt.tight_layout()
+    plt.draw()
 
-    name_without_ext = os.path.splitext(file_name)[0]
-    fig.canvas.get_default_filename = lambda: f"{name_without_ext}.png"
+nested_baseline = "ALWAYS_LOCAL"
+nested_strategies = [
+    #("ALWAYS_OFFLOAD", "Ulkoista aina"),
+    #("OPTIMAL", "Optimaalinen ratkaisu"),
+    ("GREEDY", "Ahne ulkoistaminen"),
+    ("LYAPUNOV", "Lyapunov-optimointi"),
+    ("REINFORCEMENT_LEARNING", "Q-vahvistusoppiminen")
+]
+
+def plot_nested(file_name):
+    """todo"""
+    csv_path = os.path.join(sim_dir, file_name)
+    df = pd.read_csv(csv_path)
+    sweep_x = df.columns[0]
+    sweep_y = df.columns[1]
+
+    fig.clf()
+    strat_axes = fig.subplots(len(nested_strategies), 3)
+    #fig, strat_axes = plt.subplots(len(nested_strategies), 3, figsize=(15, 4 * len(nested_strategies)))
+
+    for i, (strategy, label) in enumerate(nested_strategies):
+        strat_baseline_ratio_e = df[f"{strategy}_e_total"] / df[f"{nested_baseline}_e_total"]
+        strat_baseline_ratio_d = df[f"{strategy}_d_total"] / df[f"{nested_baseline}_d_total"]
+        offloading_ratio = df[f"{strategy}_offload_count"] / df[f"{strategy}_task_total"]
+        
+        tmp = df[[sweep_x, sweep_y]].copy()
+        tmp["energy_ratio"] = strat_baseline_ratio_e
+        tmp["delay_ratio"] = strat_baseline_ratio_d
+        tmp["offload_ratio"] = offloading_ratio
+
+        # Pivot into 2D grids
+        e_grid = tmp.pivot(index=sweep_y, columns=sweep_x, values="energy_ratio")
+        d_grid = tmp.pivot(index=sweep_y, columns=sweep_x, values="delay_ratio")
+        r_grid = tmp.pivot(index=sweep_y, columns=sweep_x, values="offload_ratio")
+        
+        e_ax, d_ax, r_ax = strat_axes[i]
+
+        im1 = e_ax.imshow(e_grid, aspect='auto', origin='lower')
+        im2 = d_ax.imshow(d_grid, aspect='auto', origin='lower')
+        im3 = r_ax.imshow(r_grid, aspect='auto', origin='lower')
+
+        e_ax.set_title(f"{label} - energia (suhde)")
+        d_ax.set_title(f"{label} - viive (suhde)")
+        r_ax.set_title(f"{label} - ulkoistamisen osuus")
+
+        for ax in (e_ax, d_ax, r_ax):
+            ax.set_xlabel(sweep_x)
+            ax.set_ylabel(sweep_y)
+
+        for (ax, grid) in ((e_ax, e_grid), (d_ax, d_grid), (r_ax, r_grid)):
+            tick_step_x = max(1, len(grid.columns) // 3)
+            tick_step_y = max(1, len(grid.index) // 3)
+            
+            ticks_x = list(range(0, len(grid.columns), tick_step_x))
+            ax.set_xticks(ticks_x)
+            ax.set_xticklabels(grid.columns[ticks_x])
+
+            ticks_y = list(range(0, len(grid.index), tick_step_y))
+            ax.set_yticks(ticks_y)
+            ax.set_yticklabels(grid.index[ticks_y])
+
+        fig.colorbar(im1, ax=e_ax)
+        fig.colorbar(im2, ax=d_ax)
+        fig.colorbar(im3, ax=r_ax)
 
     plt.tight_layout()
-    plt.show()
+    plt.draw()
+
+def plot_csv(file_name: str):
+    if file_name.startswith("nested_"):
+        plot_nested(file_name)
+    else:
+        plot_single(file_name)
+
+    if fig.canvas.manager:
+        fig.canvas.manager.set_window_title(f"Viewing file {file_name} ({current_index+1}/{len(csv_files)})")
+    name_without_ext = os.path.splitext(file_name)[0]
+    fig.canvas.get_default_filename = lambda: f"{name_without_ext}.png"
 
 def on_key(event):
     """Change between plots"""
