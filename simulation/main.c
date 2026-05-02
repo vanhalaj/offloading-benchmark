@@ -12,6 +12,7 @@
 #include "testcases/test_bandwidth_up.h"
 #include "testcases/test_dependency.h"
 #include "testcases/test_complexity_size.h"
+#include "testcases/test_bandwidth_latency.h"
 
 const TestCase* tests[] = {
     &test_latency,
@@ -20,7 +21,8 @@ const TestCase* tests[] = {
     &test_cpu_freq_local,
     &test_bandwidth_up,
     &test_dependency,
-    &test_complexity_size
+    &test_complexity_size,
+    &test_bandwidth_latency
 };
 const int test_count = sizeof(tests) / sizeof(TestCase*);
 
