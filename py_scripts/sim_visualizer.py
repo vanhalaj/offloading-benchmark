@@ -6,6 +6,74 @@ from keys import get_target
 
 SHOW_SUB_TITLES = False
 
+AXIS_MAP = {
+    "f_local": {
+        "scale": lambda x: x / (1000*1000),
+        "label": "$f_{local}$ (MHz)"
+    },
+    "f_off": {
+        "scale": lambda x: x / (1000*1000),
+        "label": "$f_{off}$ (MHz)"
+    },
+    "d_latency": {
+        "scale": lambda x: x * 1000,
+        "label": "Latency (ms)"
+    },
+    "d_latency (var)": {
+        "scale": lambda x: x * 1000,
+        "label": "variance Latency (ms)"
+    },
+    "R_up": {
+        "scale": lambda x: x / (1024*1024) * 8,
+        "label": "$R_{up}$ (Mb/s)"
+    },
+    "R_down": {
+        "scale": lambda x: x / (1024*1024) * 8,
+        "label": "$R_{down}$ (Mb/s)"
+    },
+    "P_load": {
+        "scale": lambda x: x,
+        "label": "$P_{load}$ (W)"
+    },
+    "P_idle": {
+        "scale": lambda x: x,
+        "label": "$P_{idle}$ (W)"
+    },
+    "P_tx": {
+        "scale": lambda x: x,
+        "label": "$P_{tx}$ (W)"
+    },
+    "P_rx": {
+        "scale": lambda x: x,
+        "label": "$P_{rx}$ (W)"
+    },
+    "c_T": {
+        "scale": lambda x: x / (1000*1000),
+        "label": "$c_{T}$ (megacycles)"
+    },
+    "c_T (var)": {
+        "scale": lambda x: x / (1000*1000),
+        "label": "variance $c_{T}$ (megacycles)"
+    },
+    "L_T": {
+        "scale": lambda x: x / 1024,
+        "label": "$L_{T}$ (kB)"
+    },
+    "L_T (var)": {
+        "scale": lambda x: x / 1024,
+        "label": "variance $L_{T}$ (kB)"
+    },
+    "dependency_rate": {
+        "scale": lambda x: x,
+        "label": "dependency rate"
+    }
+}
+
+def map_axis(series, name):
+    if name in AXIS_MAP:
+        return AXIS_MAP[name]["scale"](series), AXIS_MAP[name]["label"]
+    return series, name
+
 # ---------------------------------------------------------
 # Find CSV files from simulation dir in paths.txt
 # ---------------------------------------------------------
@@ -43,7 +111,9 @@ def plot_single(file_name):
     axes = fig.subplots(3, 1)
     energy_ax, delay_ax, ratio_ax = axes
     
-    sweep_col = df.columns[0]
+    sweep_col_name = df.columns[0]
+    sweep_col, sweep_label = map_axis(df[sweep_col_name], sweep_col_name)
+
     for strategy, marker_type, line_style, label in strategies:
         e_col = f"{strategy}_e_total"
         d_col = f"{strategy}_d_total"
@@ -52,29 +122,29 @@ def plot_single(file_name):
         # offloading ratio
         ratio = df[offload_col] / df[task_col]
 
-        energy_ax.plot(df[sweep_col], df[e_col], marker=marker_type, linestyle=line_style, markersize=5, label=label)
-        delay_ax.plot(df[sweep_col], df[d_col], marker=marker_type, linestyle=line_style, markersize=5, label=label)
-        ratio_ax.plot(df[sweep_col], ratio, marker=marker_type, linestyle=line_style, markersize=5, label=label)
+        energy_ax.plot(sweep_col, df[e_col], marker=marker_type, linestyle=line_style, markersize=5, label=label)
+        delay_ax.plot(sweep_col, df[d_col], marker=marker_type, linestyle=line_style, markersize=5, label=label)
+        ratio_ax.plot(sweep_col, ratio, marker=marker_type, linestyle=line_style, markersize=5, label=label)
 
     if SHOW_SUB_TITLES:
-        # energy_ax.set_title(f"Total Energy vs {sweep_col}")
-        energy_ax.set_title(f"Kokonaisenergia vs {sweep_col}")
-        # delay_ax.set_title(f"Total Delay vs {sweep_col}")
-        delay_ax.set_title(f"Kokonaisviive vs {sweep_col}")
-        # ratio_ax.set_title(f"Offloading Ratio vs {sweep_col}")
-        ratio_ax.set_title(f"Ulkoistamisen osuus vs {sweep_col}")
+        # energy_ax.set_title(f"Total Energy vs {sweep_label}")
+        energy_ax.set_title(f"Kokonaisenergia vs {sweep_label}")
+        # delay_ax.set_title(f"Total Delay vs {sweep_label}")
+        delay_ax.set_title(f"Kokonaisviive vs {sweep_label}")
+        # ratio_ax.set_title(f"Offloading Ratio vs {sweep_label}")
+        ratio_ax.set_title(f"Ulkoistamisen osuus vs {sweep_label}")
 
-    energy_ax.set_xlabel(sweep_col)
+    energy_ax.set_xlabel(sweep_label)
     # energy_ax.set_ylabel("Total Energy (J)")
     energy_ax.set_ylabel("Kokonaisenergia (J)")
     energy_ax.legend()
 
-    delay_ax.set_xlabel(sweep_col)
+    delay_ax.set_xlabel(sweep_label)
     # delay_ax.set_ylabel("Total Delay (s)")
     delay_ax.set_ylabel("Kokonaisviive (s)")
     delay_ax.legend()
 
-    ratio_ax.set_xlabel(sweep_col)
+    ratio_ax.set_xlabel(sweep_label)
     # ratio_ax.set_ylabel("Offloading Ratio")
     ratio_ax.set_ylabel("Ulkoistamisen osuus")
     ratio_ax.legend()
@@ -134,21 +204,22 @@ def plot_nested(file_name):
         d_ax.set_title(f"{label} - viive (suhde)")
         #r_ax.set_title(f"{label} - ulkoistamisen osuus")
 
-        for ax in (e_ax, d_ax): # r_ax
-            ax.set_xlabel(sweep_x)
-            ax.set_ylabel(sweep_y)
-
         for (ax, grid) in ((e_ax, e_grid), (d_ax, d_grid)): # (r_ax, r_grid)
-            tick_step_x = max(1, len(grid.columns) // 3)
-            tick_step_y = max(1, len(grid.index) // 3)
+            x_vals, x_label = map_axis(grid.columns, sweep_x)
+            y_vals, y_label = map_axis(grid.index, sweep_y)
             
-            ticks_x = list(range(0, len(grid.columns), tick_step_x))
+            tick_step_x = max(1, len(x_vals) // 3)
+            tick_step_y = max(1, len(y_vals) // 3)
+            
+            ticks_x = list(range(0, len(x_vals), tick_step_x))
             ax.set_xticks(ticks_x)
-            ax.set_xticklabels(grid.columns[ticks_x])
+            ax.set_xticklabels(x_vals[ticks_x])
+            ax.set_xlabel(x_label)
 
-            ticks_y = list(range(0, len(grid.index), tick_step_y))
+            ticks_y = list(range(0, len(y_vals), tick_step_y))
             ax.set_yticks(ticks_y)
-            ax.set_yticklabels(grid.index[ticks_y])
+            ax.set_yticklabels(y_vals[ticks_y])
+            ax.set_ylabel(y_label)
 
         fig.colorbar(im1, ax=e_ax)
         fig.colorbar(im2, ax=d_ax)
