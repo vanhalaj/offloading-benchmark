@@ -27,7 +27,7 @@ void generate_task_queue(TaskDescription* task_queue, const SchedulerConfig* con
 	{
 		const int size = random_range(config->avg_size - config->var_size, config->avg_size + config->var_size);
 		const int type = rand() % TASK_FUNCTIONS_COUNT;
-		const int dependency = rand() > (int)(config->dependency_probability * RAND_MAX);
+		const int dependency = random_range_d(0.0, 1.0) < config->dependency_probability;
 		const int offloadability = 1;// rand() > (int)(OFFLOADABLE_PROBABILITY * RAND_MAX);
 
 		const double complexity = config->complexity_mode == COMPLEXITY_ESTIMATE

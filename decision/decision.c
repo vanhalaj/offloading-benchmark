@@ -92,7 +92,7 @@ DecisionFactors calculate_factors(const DeviceDescriptions* devices, const TaskD
 	double e_rx = devices->power_receiver * d_recv;
 	
 	double e_local = e_comp_local;
-	double e_off = e_tx + e_idle + e_rx;
+	double e_off = (1 - (task->dependent && previous_decision)) * e_tx + e_idle + e_rx;
 
 	DecisionFactors factors = {
 		.task = *task,
