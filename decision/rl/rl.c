@@ -119,3 +119,41 @@ int reinforcement_learning_decision(const DecisionFactors* f)
 
     return action;
 }
+
+int rl_load_q_table(const char* file_name)
+{
+    FILE* fp = fopen(file_name, "rb");
+    if (!fp) {
+        printf("Failed to load Q-table, creating a new one\n");
+        return -1;
+    }
+
+    fseek(fp, 0, SEEK_END);
+    size_t size = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+
+    size_t q_count = sizeof(Q) / sizeof(double);
+
+    size_t elem_read = fread(Q, sizeof(double), q_count, fp);
+    fclose(fp);
+
+    if (elem_read < q_count || elem_read * sizeof(double) != size)
+    {
+        printf("Failed to load Q-table. Expected %zu bytes but file size is %zu (%zu elements read)\n", sizeof(Q), size, elem_read);
+        return -1;
+    }
+    return 0;
+}
+
+int rl_save_q_table(const char* file_name)
+{
+    FILE* fp = fopen(file_name, "wb");
+    if (!fp) {
+        printf("Failed to save Q-table\n");
+        return -1;
+    }
+
+    size_t written = fwrite(Q, sizeof(double), sizeof(Q) / sizeof(double), fp);
+    fclose(fp);
+    return 0;
+}

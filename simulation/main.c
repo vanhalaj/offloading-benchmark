@@ -4,6 +4,7 @@
 #include "testcase.h"
 #include "simulate.h"
 #include "decision.h"
+#include "rl/rl.h"
 
 #include "testcases/test_latency.h"
 #include "testcases/test_latency_var.h"
@@ -28,6 +29,8 @@ const int test_count = sizeof(tests) / sizeof(TestCase*);
 
 int main(void)
 {
+    rl_load_q_table("q_table.bin");
+
     printf("Simulation started\n");
 
     for (int i = 0; i < test_count; i++)
@@ -40,5 +43,8 @@ int main(void)
     }
 
     printf("Simulation done, %d cases run\n", test_count);
+
+    rl_save_q_table("q_table.bin");
+
     return 0;
 }
