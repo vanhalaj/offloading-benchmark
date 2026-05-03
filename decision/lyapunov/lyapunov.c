@@ -11,7 +11,7 @@
 #include <math.h>
 #include <stdio.h>
 
-double v = 800.0;
+double v = 2000.0;
 double rho = 0.1;
 
 // Set by the simulator with: amount of tasks / total delay of full local execution
