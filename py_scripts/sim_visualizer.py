@@ -18,11 +18,11 @@ AXIS_MAP = {
     },
     "d_latency": {
         "scale": lambda x: x * 1000,
-        "label": "$d_{latency}$ (ms)"
+        "label": r"$\mathrm{\mathbb{E}}(d_{latency})$ (ms)"
     },
     "d_latency (var)": {
         "scale": lambda x: x * 1000,
-        "label": "variance Latency (ms)"
+        "label": "$d_{jitter}$ (ms)"
     },
     "R_up": {
         "scale": lambda x: x / (1000*1000) * 8,
@@ -50,11 +50,11 @@ AXIS_MAP = {
     },
     "c_T": {
         "scale": lambda x: x / (1000*1000),
-        "label": "$c_{T}$ (megacycles)"
+        "label": r"$\mathrm{\mathbb{E}}(c_{T})$ (miljoonaa sykliä)"
     },
     "c_T (var)": {
         "scale": lambda x: x / (1000*1000),
-        "label": "variance $c_{T}$ (megacycles)"
+        "label": "variance $c_{T}$ (miljoonaa sykliä)" # TODO
     },
     "L_T": {
         "scale": lambda x: x / 1000,
@@ -62,11 +62,11 @@ AXIS_MAP = {
     },
     "L_T (var)": {
         "scale": lambda x: x / 1000,
-        "label": "variance $L_{T}$ (kB)"
+        "label": "variance $L_{T}$ (kB)" # TODO
     },
     "dependency_rate": {
         "scale": lambda x: x,
-        "label": "dependency rate"
+        "label": "riippuvaisten tehtävien suhteellinen määrä"
     }
 }
 
@@ -214,8 +214,8 @@ def plot_nested(file_name):
         im2 = d_ax.imshow(d_grid, aspect='auto', origin='lower', cmap=custom_cmap, norm=norm)
         #im3 = r_ax.imshow(r_grid, aspect='auto', origin='lower', cmap=cmap, norm=norm)
 
-        e_ax.set_title(f"{label} - energia (suhde)")
-        d_ax.set_title(f"{label} - viive (suhde)")
+        e_ax.set_title(f"{label} - energian suhdeluku")
+        d_ax.set_title(f"{label} - viiveen suhdeluku")
         #r_ax.set_title(f"{label} - ulkoistamisen osuus")
 
         for (ax, grid) in ((e_ax, e_grid), (d_ax, d_grid)): # (r_ax, r_grid)
