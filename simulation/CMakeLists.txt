@@ -13,6 +13,7 @@ add_executable(simulation
     testcases/test_dependency.h
     testcases/test_complexity_size.h
     testcases/test_bandwidth_latency.h
+    testcases/test_latency_avg_var.h
 )
 
 target_include_directories(simulation PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
