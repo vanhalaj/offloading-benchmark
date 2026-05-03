@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+import numpy as np
 from keys import get_target
 
 SHOW_SUB_TITLES = False
@@ -17,18 +18,18 @@ AXIS_MAP = {
     },
     "d_latency": {
         "scale": lambda x: x * 1000,
-        "label": "Latency (ms)"
+        "label": "$d_{latency}$ (ms)"
     },
     "d_latency (var)": {
         "scale": lambda x: x * 1000,
         "label": "variance Latency (ms)"
     },
     "R_up": {
-        "scale": lambda x: x / (1024*1024) * 8,
+        "scale": lambda x: x / (1000*1000) * 8,
         "label": "$R_{up}$ (Mb/s)"
     },
     "R_down": {
-        "scale": lambda x: x / (1024*1024) * 8,
+        "scale": lambda x: x / (1000*1000) * 8,
         "label": "$R_{down}$ (Mb/s)"
     },
     "P_load": {
@@ -56,11 +57,11 @@ AXIS_MAP = {
         "label": "variance $c_{T}$ (megacycles)"
     },
     "L_T": {
-        "scale": lambda x: x / 1024,
+        "scale": lambda x: x / 1000,
         "label": "$L_{T}$ (kB)"
     },
     "L_T (var)": {
-        "scale": lambda x: x / 1024,
+        "scale": lambda x: x / 1000,
         "label": "variance $L_{T}$ (kB)"
     },
     "dependency_rate": {
@@ -90,6 +91,7 @@ if not csv_files:
 # ---------------------------------------------------------
 # Plotting functions
 # ---------------------------------------------------------
+# Single sweep plotting
 strategies = [
     ("ALWAYS_LOCAL", 's', ':', "Aina paikallisesti"),
     ("ALWAYS_OFFLOAD", 'o', ':', "Ulkoista aina"),
@@ -156,6 +158,7 @@ def plot_single(file_name):
     plt.tight_layout()
     plt.draw()
 
+# Nested (double-sweep) plotting
 nested_baseline = "ALWAYS_LOCAL"
 nested_strategies = [
     #("ALWAYS_OFFLOAD", "Ulkoista aina"),
@@ -164,6 +167,17 @@ nested_strategies = [
     ("LYAPUNOV", "Lyapunov-optimointi"),
     ("REINFORCEMENT_LEARNING", "Q-vahvistusoppiminen")
 ]
+
+# combine color maps so viridis is used between 0.0...1.0 and after 1 red-black gradient is used
+limit_value = 1.1
+c_n1 = 512
+c_n2 = np.int32((limit_value - 1.0) * c_n1)
+colors1 = plt.get_cmap("viridis")(np.linspace(0, 1, c_n1))
+colors2 = np.zeros((c_n2, 4))
+colors2[:, 0] = np.linspace(1, 0, c_n2)
+colors2[:, 3] = 1
+custom_cmap = colors.ListedColormap(np.vstack((colors1, colors2)))
+
 
 def plot_nested(file_name):
     """Plot csv that has 2 parameter columns as a 2d heatmap"""
@@ -174,9 +188,9 @@ def plot_nested(file_name):
 
     fig.clf()
     strat_axes = fig.subplots(len(nested_strategies), 2) # 3 if offloading ratio also wanted
-    cmap = plt.get_cmap("viridis").copy()
-    cmap.set_over("red")
-    norm = colors.Normalize(vmin=0, vmax=1.001, clip=False)
+    #cmap = plt.get_cmap("viridis").copy()
+    #cmap.set_over("red")
+    norm = colors.Normalize(vmin=0, vmax=limit_value, clip=False)
 
     for i, (strategy, label) in enumerate(nested_strategies):
         strat_baseline_ratio_e = df[f"{strategy}_e_total"] / df[f"{nested_baseline}_e_total"]
@@ -196,8 +210,8 @@ def plot_nested(file_name):
         #e_ax, d_ax, r_ax = strat_axes[i]
         e_ax, d_ax = strat_axes[i]
 
-        im1 = e_ax.imshow(e_grid, aspect='auto', origin='lower', cmap=cmap, norm=norm)
-        im2 = d_ax.imshow(d_grid, aspect='auto', origin='lower', cmap=cmap, norm=norm)
+        im1 = e_ax.imshow(e_grid, aspect='auto', origin='lower', cmap=custom_cmap, norm=norm)
+        im2 = d_ax.imshow(d_grid, aspect='auto', origin='lower', cmap=custom_cmap, norm=norm)
         #im3 = r_ax.imshow(r_grid, aspect='auto', origin='lower', cmap=cmap, norm=norm)
 
         e_ax.set_title(f"{label} - energia (suhde)")
