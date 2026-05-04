@@ -45,4 +45,6 @@ int do_offload_decision(const DecisionFactors* factors, DecisionAlgorithm algori
  */
 DecisionFactors calculate_factors(const DeviceDescriptions* devices, const TaskDescription* task, int previous_decision);
 
+void reset_states(void);
+
 #endif // DECISION_H

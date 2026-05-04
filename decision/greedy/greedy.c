@@ -53,3 +53,9 @@ double get_max_loss(void)
 {
 	return max_loss_difference - 1.0;
 }
+
+void greedy_reset(void)
+{
+	accumulated_delay_profit = 0.0;
+	accumulated_energy_profit = 0.0;
+}

@@ -11,4 +11,6 @@ void set_v(double v);
 
 double get_v(void);
 
+void lyapunov_reset(void);
+
 #endif

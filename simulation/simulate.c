@@ -173,6 +173,7 @@ void run_testcase(const TestCase* specs)
         exit(EXIT_FAILURE);
     }
 
+    reset_states();
     run_sweep(specs, fp);
 
     fflush(fp);

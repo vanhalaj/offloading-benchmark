@@ -67,3 +67,9 @@ double get_v(void)
 {
 	return v;
 }
+
+void lyapunov_reset(void)
+{
+	X1 = 0.0;
+	X2 = 0.0;
+}

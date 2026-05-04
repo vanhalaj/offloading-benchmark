@@ -112,3 +112,10 @@ DecisionFactors calculate_factors(const DeviceDescriptions* devices, const TaskD
 	
 	return factors;
 }
+
+void reset_states(void)
+{
+	greedy_reset();
+	lyapunov_reset();
+	rl_reset();
+}

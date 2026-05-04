@@ -13,4 +13,6 @@ void set_max_loss(double ratio);
 
 double get_max_loss(void);
 
+void greedy_reset(void);
+
 #endif

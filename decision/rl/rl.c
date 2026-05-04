@@ -156,3 +156,13 @@ int rl_save_q_table(const char* file_name)
     fclose(fp);
     return 0;
 }
+
+void rl_reset(void)
+{
+    lambda = 0.0;
+    prev_d_bin = -1;
+    prev_e_bin = -1;
+    prev_action = -1;
+    avg_delay = 0.0;
+    smoothing = 0.0;
+}

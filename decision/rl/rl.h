@@ -9,4 +9,6 @@ int rl_load_q_table(const char* file_name);
 
 int rl_save_q_table(const char* file_name);
 
+void rl_reset(void);
+
 #endif
