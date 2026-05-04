@@ -22,15 +22,20 @@
 
 static double Q[BINS][BINS][ACTIONS] = { 0 };
 
-static double lr = 0.1;
-static double discount = 0.9;
-static double epsilon = 0.05;
+static const double lr = 0.1;
+static const double discount = 0.9;
+static const double epsilon = 0.05;
 
 static double lambda = 0.0;
 
 static int prev_d_bin = -1;
 static int prev_e_bin = -1;
 static int prev_action = -1;
+
+#if USE_SMOOTH_AVERAGE_DELAY
+static double avg_delay = 0.0;
+static double smoothing = 0.01;
+#endif
 
 static int discretize(double value, double max)
 {
@@ -67,18 +72,12 @@ static void update_lambda(const DecisionFactors* f, int action)
     double delay = action ? f->delay_offloaded : f->delay_local;
 
 #if USE_SMOOTH_AVERAGE_DELAY
-    static double avg_delay = 0.0;
-    static double beta = 0.01; // smoothing factor
-
-    avg_delay = (1 - beta) * avg_delay + beta * delay;
-
+    avg_delay = (1 - smoothing) * avg_delay + smoothing * delay;
     double violation = avg_delay - f->delay_local;
-    lambda += STEP_SIZE * violation;
 #else
     double violation = delay - f->delay_local;
-
-    lambda += STEP_SIZE * violation;
 #endif
+    lambda += STEP_SIZE * violation;
 
     if (lambda < 0.0)
         lambda = 0.0;
@@ -102,7 +101,7 @@ int reinforcement_learning_decision(const DecisionFactors* f)
 
     // eps-greedy choosing
     int action;
-    if (f->delay_offloaded > f->delay_local * 1.5)
+    if (f->delay_offloaded > f->delay_local * 1.35)
         action = 0;   // force local
     else 
     {
