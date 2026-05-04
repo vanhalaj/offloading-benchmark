@@ -139,23 +139,26 @@ def plot_single(file_name):
     energy_ax.set_xlabel(sweep_label)
     # energy_ax.set_ylabel("Total Energy (J)")
     energy_ax.set_ylabel("Kokonaisenergia (J)")
-    energy_ax.legend()
+    #energy_ax.legend()
 
     delay_ax.set_xlabel(sweep_label)
     # delay_ax.set_ylabel("Total Delay (s)")
     delay_ax.set_ylabel("Kokonaisviive (s)")
-    delay_ax.legend()
+    #delay_ax.legend()
 
     ratio_ax.set_xlabel(sweep_label)
     # ratio_ax.set_ylabel("Offloading Ratio")
     ratio_ax.set_ylabel("Ulkoistamisen osuus")
-    ratio_ax.legend()
+    #ratio_ax.legend()
+
+    handles, labels = energy_ax.get_legend_handles_labels()
+    fig.legend(handles, labels, loc="upper center", ncol=len(strategies)/2+1)
 
     # no empty space on left and right sides
     for ax in axes:
         ax.margins(x=0)
 
-    plt.tight_layout()
+    plt.tight_layout(rect=[0, 0, 1, 0.92])
     plt.draw()
 
 # Nested (double-sweep) plotting
