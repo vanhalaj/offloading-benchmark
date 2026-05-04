@@ -18,7 +18,7 @@ AXIS_MAP = {
     },
     "d_latency": {
         "scale": lambda x: x * 1000,
-        "label": r"$\mathrm{\mathbb{E}}(d_{latency})$ (ms)"
+        "label": r"$\overline{d}_{latency}$ (ms)"
     },
     "d_latency (var)": {
         "scale": lambda x: x * 1000,
@@ -50,7 +50,7 @@ AXIS_MAP = {
     },
     "c_T": {
         "scale": lambda x: x / (1000*1000),
-        "label": r"$\mathrm{\mathbb{E}}(c_{T})$ (miljoonaa sykliä)"
+        "label": r"$\overline{c}_{T}$ (miljoonaa sykliä)"
     },
     "c_T (var)": {
         "scale": lambda x: x / (1000*1000),
@@ -98,7 +98,7 @@ strategies = [
     #("OPTIMAL", 's', '-', "Optimaalinen ratkaisu"),
     ("GREEDY", '^', '-', "Ahne ulkoistaminen"),
     ("LYAPUNOV", 'x', '-', "Lyapunov-optimointi"),
-    ("REINFORCEMENT_LEARNING", 'D', '-', "Q-vahvistusoppiminen")
+    ("REINFORCEMENT_LEARNING", 'D', '-', "Q-oppiminen")
 ]
 
 fig, axes = plt.subplots(3, 1, figsize=(10, 15))
@@ -165,7 +165,7 @@ nested_strategies = [
     #("OPTIMAL", "Optimaalinen ratkaisu"),
     ("GREEDY", "Ahne ulkoistaminen"),
     ("LYAPUNOV", "Lyapunov-optimointi"),
-    ("REINFORCEMENT_LEARNING", "Q-vahvistusoppiminen")
+    ("REINFORCEMENT_LEARNING", "Q-oppiminen")
 ]
 
 # combine color maps so viridis is used between 0.0...1.0 and after 1 red-black gradient is used
@@ -214,8 +214,8 @@ def plot_nested(file_name):
         im2 = d_ax.imshow(d_grid, aspect='auto', origin='lower', cmap=custom_cmap, norm=norm)
         #im3 = r_ax.imshow(r_grid, aspect='auto', origin='lower', cmap=cmap, norm=norm)
 
-        e_ax.set_title(f"{label} - energian suhdeluku")
-        d_ax.set_title(f"{label} - viiveen suhdeluku")
+        e_ax.set_title(f"{label}, energian suhdeluku")
+        d_ax.set_title(f"{label}, viiveen suhdeluku")
         #r_ax.set_title(f"{label} - ulkoistamisen osuus")
 
         for (ax, grid) in ((e_ax, e_grid), (d_ax, d_grid)): # (r_ax, r_grid)
